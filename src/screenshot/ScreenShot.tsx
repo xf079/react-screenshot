@@ -16,6 +16,7 @@ import {
   SHOT_TOOLBAR_SPLIT,
   SHOT_TOOLBAR_WIDTH
 } from './constants';
+import { useMouseShotHandler } from './hooks/useMouseShotHandler';
 import { useMouseShapeHandler } from './hooks/useMouseShapeHandler.ts';
 import { useMousePreviewColor } from './hooks/useMousePreviewColor';
 import { ShotMousePreviewRect } from './components/ShotMousePreviewRect';
@@ -23,23 +24,14 @@ import { ShotSizeContainer } from './components/ShotSizeContainer';
 import { ShotToolsContainer } from './components/ShotToolsContainer';
 import { Shapes } from './components/shapes';
 import { ShotContext } from './Context';
-import { useMouseShotHandler } from './hooks/useMouseShotHandler.ts';
 
 export interface ScreenShotProps {
   image: string;
   width: number;
   height: number;
-  primaryColor?: string;
-  options?: IToolOptionsType;
 }
 
-const ScreenShot: FC<ScreenShotProps> = ({
-  image,
-  width,
-  height,
-  primaryColor = '#4096ff',
-  options
-}) => {
+const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
   const source = useRef(new window.Image());
   const [ready, setReady] = useState(false);
 
@@ -56,7 +48,8 @@ const ScreenShot: FC<ScreenShotProps> = ({
   const shotRef = useRef<Konva.Rect>(null);
   const shotTrRef = useRef<Konva.Transformer>(null);
 
-  const { pos, color, previewImage } = useMousePreviewColor();
+  const { pos, color, preview, onMouseColorMoveHandler } =
+    useMousePreviewColor();
 
   const {
     onShotMouseDownHandler,
@@ -242,6 +235,22 @@ const ScreenShot: FC<ScreenShotProps> = ({
       <Stage
         width={width}
         height={height}
+        onMouseDown={(e) => {
+          if (!state.shot) {
+            onShotMouseDownHandler(e);
+          } else {
+            onShapeMouseDownHandler(e);
+          }
+        }}
+        onMouseMove={(e) => {
+          if (state.mode === 'shot') {
+            onShotMouseMoveHandler(e);
+          } else if (state.mode === 'shape') {
+            onShapeMouseMoveHandler(e);
+          } else {
+            onMouseColorMoveHandler(e);
+          }
+        }}
         onMouseUp={() => {
           console.log('out');
           if (state.mode === 'shot') {
@@ -269,8 +278,6 @@ const ScreenShot: FC<ScreenShotProps> = ({
             y={0}
             width={width}
             height={height}
-            onMouseDown={onShotMouseDownHandler}
-            onMouseMove={onShotMouseMoveHandler}
             fill='rgba(0,0,0,0.5)'
           />
           {state.shot ? (
@@ -291,8 +298,6 @@ const ScreenShot: FC<ScreenShotProps> = ({
                 onTransformStart={onShotDragStart}
                 onDragMove={onShotDragMove}
                 onDragEnd={onShotDragEnd}
-                onMouseDown={onShapeMouseDownHandler}
-                onMouseMove={onShapeMouseMoveHandler}
                 onTransform={onShotTransformer}
                 onTransformEnd={onShotTransformEnd}
               />
@@ -300,12 +305,12 @@ const ScreenShot: FC<ScreenShotProps> = ({
                 ref={shotTrRef}
                 resizeEnabled={true}
                 rotateEnabled={false}
-                anchorSize={6}
-                anchorFill={primaryColor}
-                anchorStroke={primaryColor}
-                anchorCornerRadius={0}
+                anchorSize={8}
+                anchorFill='#ffffff'
+                anchorStroke='#ffffff'
+                anchorCornerRadius={6}
                 ignoreStroke={true}
-                borderStroke={primaryColor}
+                borderStroke='#1677ff'
                 borderStrokeWidth={1}
                 centeredScaling={false}
                 keepRatio={false}
@@ -322,12 +327,12 @@ const ScreenShot: FC<ScreenShotProps> = ({
               />
             </Fragment>
           ) : null}
-          {previewImage && color && pos && !state.shot ? (
+          {preview && color && pos && !state.shot ? (
             <ShotMousePreviewRect
               pos={pos}
               color={color}
-              image={previewImage}
-              primaryColor={primaryColor}
+              image={preview}
+              primaryColor='#1677ff'
             />
           ) : null}
           <Shapes list={shapes} />
@@ -362,17 +367,6 @@ const ScreenShot: FC<ScreenShotProps> = ({
           x={toolsRect.x}
           y={toolsRect.y}
           position={toolsRect.position}
-          options={options}
-          onAction={(action) => {
-            dispatch({
-              type: 'SET_MODE',
-              payload: 'shape'
-            });
-            dispatch({
-              type: 'UPDATE_ACTION',
-              payload: action
-            });
-          }}
         />
       ) : null}
     </div>

@@ -2,28 +2,29 @@ import { FC, memo } from 'react';
 import { useControllableValue } from 'ahooks';
 import { Check } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
-import { Checkbox } from '@/components/ui/checkbox';
-import { circleDefaultOptions, ToolColorList } from '../../config';
+import { lineDefaultOptions, ToolColorList } from '../../config';
 
-export interface ICircleOption {
+export interface IArrowOptions {
   options?: IShapeOption;
   defaultOptions?: IShapeOption;
   onUpdateOptions: (options: IShapeOption) => void;
 }
 
-export const OptionCircle: FC<ICircleOption> = memo((props) => {
+export const OptionArrow: FC<IArrowOptions> = memo((props) => {
   const [state, updateState] = useControllableValue(props, {
-    defaultValue: circleDefaultOptions,
+    defaultValue: lineDefaultOptions,
     defaultValuePropName: 'defaultOptions',
     valuePropName: 'options',
     trigger: 'onUpdateOptions'
   });
 
   return (
-    <div className='w-[315px] flex flex-row items-center gap-3'>
+    <div className='w-[234px] flex flex-row items-center gap-3'>
       <div className='flex flex-col gap-2'>
         <div className='flex flex-row justify-end items-center gap-2'>
-          <span className='w-9 text-right text-xs text-stone-900 text-opacity-90'>大小</span>
+          <span className='w-9 text-right text-xs text-stone-900 text-opacity-90'>
+            大小
+          </span>
           <Slider
             defaultValue={[state.size || 0]}
             min={1}
@@ -40,7 +41,9 @@ export const OptionCircle: FC<ICircleOption> = memo((props) => {
           </span>
         </div>
         <div className='flex flex-row flex-shrink-0  justify-end items-center gap-2'>
-          <span className='w-9 text-right text-xs text-stone-900 text-opacity-90'>透明度</span>
+          <span className='w-9 text-right text-xs text-stone-900 text-opacity-90'>
+            透明度
+          </span>
           <Slider
             defaultValue={[state.opacity || 0]}
             min={0}
@@ -70,17 +73,6 @@ export const OptionCircle: FC<ICircleOption> = memo((props) => {
             {state.color === val && <Check className='w-3 h-3 text-white' />}
           </a>
         ))}
-      </div>
-      <div className='h-full flex flex-col justify-center self-start items-start gap-2 pt-0.5 ml-2'>
-        <div
-          className='flex flex-rwo justify-start items-center gap-1.5 cursor-pointer'
-          onClick={() => {
-            updateState({ ...state, full: !state.full });
-          }}
-        >
-          <Checkbox checked={state.full} />
-          <span className='flex-shrink-0 text-xs text-stone-900 text-opacity-90'>空心</span>
-        </div>
       </div>
     </div>
   );

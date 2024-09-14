@@ -1,9 +1,9 @@
-import { FC, memo, useState } from 'react';
-import { Checkbox, ColorPicker, Flex, Slider, Typography } from 'antd';
-import { Check } from 'lucide-react';
-import { rectDefaultOptions, ToolColorList } from '../../config';
+import { FC, memo } from 'react';
 import { useControllableValue } from 'ahooks';
-import { useStyles } from './styles';
+import { Check } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
+import { Checkbox } from '@/components/ui/checkbox';
+import { circleDefaultOptions, ToolColorList } from '../../config';
 
 export interface IRectOptions {
   options?: IShapeOption;
@@ -12,106 +12,93 @@ export interface IRectOptions {
 }
 
 export const OptionRect: FC<IRectOptions> = memo((props) => {
-  const { styles, cx } = useStyles();
   const [state, updateState] = useControllableValue(props, {
-    defaultValue: rectDefaultOptions,
+    defaultValue: circleDefaultOptions,
     defaultValuePropName: 'defaultOptions',
     valuePropName: 'options',
     trigger: 'onUpdateOptions'
   });
 
-  const [hasCustomColor, setHasCustomColor] = useState(false);
-
   return (
-    <Flex gap={12}>
-      <Flex vertical gap={6}>
-        <Flex justify='space-between' gap={6} align='center'>
-          <Typography.Text style={{ fontSize: 12 }}>大小</Typography.Text>
+    <div className='w-[315px] flex flex-row items-center gap-3'>
+      <div className='flex flex-col gap-2'>
+        <div className='flex flex-row justify-end items-center gap-2'>
+          <span className='w-9 text-right text-xs text-stone-900 text-opacity-90'>
+            大小
+          </span>
           <Slider
+            defaultValue={[state.size || 0]}
             min={1}
-            max={40}
-            defaultValue={1}
-            value={state.size}
-            onChange={(value) => {
-              updateState({
-                ...state,
-                size: value
-              });
+            max={100}
+            step={1}
+            value={[state.size || 0]}
+            className='w-[60px]'
+            onValueChange={(values) => {
+              updateState({ ...state, size: values[0] });
             }}
-            style={{ width: 48 }}
           />
-        </Flex>
-        <Flex justify='space-between' gap={6} align='center'>
-          <Typography.Text style={{ fontSize: 12 }}>透明度</Typography.Text>
+          <span className='w-6  text-xs text-stone-900 text-opacity-90'>
+            {state.size || 0}
+          </span>
+        </div>
+        <div className='flex flex-row flex-shrink-0  justify-end items-center gap-2'>
+          <span className='w-9 text-right text-xs text-stone-900 text-opacity-90'>
+            透明度
+          </span>
           <Slider
+            defaultValue={[state.opacity || 0]}
             min={0}
             max={100}
-            defaultValue={1}
-            value={(state.opacity || 1) * 100}
-            onChange={(value) => {
-              updateState({
-                ...state,
-                opacity: value / 100
-              });
+            step={1}
+            value={[state.opacity || 0]}
+            className='w-[60px]'
+            onValueChange={(values) => {
+              updateState({ ...state, opacity: values[0] });
             }}
-            style={{ width: 48 }}
           />
-        </Flex>
-      </Flex>
-      <Flex wrap justify='start' align='center' gap={8} style={{ width: 90 }}>
+          <span className='w-6 text-xs text-stone-900 text-opacity-90'>
+            {state.opacity || 0}
+          </span>
+        </div>
+      </div>
+      <div className='flex flex-row flex-shrink-0 justify-center items-center flex-wrap gap-2 w-[80px] pt-0.5'>
         {ToolColorList.map((val) => (
           <a
             key={val}
-            className={cx(styles.item)}
-            style={{ backgroundColor: val }}
+            className='inline-flex w-3.5 h-3.5 rounded-sm justify-center items-center cursor-pointer'
             onClick={() => {
-              setHasCustomColor(false);
               updateState({ ...state, color: val });
             }}
+            style={{ backgroundColor: val }}
           >
-            {state.color === val && <Check width={14} height={14} />}
+            {state.color === val && <Check className='w-3 h-3 text-white' />}
           </a>
         ))}
-        <ColorPicker
-          value={state.color}
-          disabledAlpha
-          onChange={(value) => {
-            setHasCustomColor(true);
-            updateState({
-              ...state,
-              color: `#${value.toHex()}`
-            });
+      </div>
+      <div className='h-full flex flex-col justify-center items-start gap-2 pt-0.5 ml-2'>
+        <div
+          className='flex flex-rwo justify-start items-center gap-1.5 cursor-pointer'
+          onClick={() => {
+            updateState({ ...state, full: !state.full });
           }}
         >
-          <a className='color-item' style={{ backgroundColor: state.color }}>
-            {hasCustomColor && <Check width={14} height={14} />}
-          </a>
-        </ColorPicker>
-      </Flex>
-      <Flex vertical>
-        <Checkbox
-          checked={state.full}
-          onChange={(e) => {
-            updateState({
-              ...state,
-              full: e.target.checked
-            });
+          <Checkbox checked={state.full} />
+          <span className='flex-shrink-0 text-xs text-stone-900 text-opacity-90'>
+            空心
+          </span>
+        </div>
+        <div
+          className='flex flex-rwo justify-start items-center gap-1.5 cursor-pointer'
+          onClick={() => {
+            updateState({ ...state, radius: !state.radius });
           }}
         >
-          <Typography.Text style={{ fontSize: 12 }}>空心</Typography.Text>
-        </Checkbox>
-        <Checkbox
-          checked={state.radius}
-          onChange={(e) => {
-            updateState({
-              ...state,
-              radius: e.target.checked
-            });
-          }}
-        >
-          <Typography.Text style={{ fontSize: 12 }}>圆角</Typography.Text>
-        </Checkbox>
-      </Flex>
-    </Flex>
+          <Checkbox checked={state.radius} />
+          <span className='flex-shrink-0 text-xs text-stone-900 text-opacity-90'>
+            圆角
+          </span>
+        </div>
+      </div>
+    </div>
   );
 });

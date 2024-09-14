@@ -53,7 +53,7 @@ export const useMouseShotHandler = () => {
   const onShotMouseOutHandler = useMemoizedFn(() => {
     if (isDrawing.current) {
       isDrawing.current = false;
-      dispatch({ type: 'SET_MODE', payload: 'shot' });
+      dispatch({ type: 'SET_MODE', payload: undefined });
       // 截图区域太小，取消截图
       if (
         (state.shot!.width || 0) < SHOT_MIN_SIZE ||

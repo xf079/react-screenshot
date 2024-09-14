@@ -16,7 +16,7 @@ export const useMousePreviewColor = () => {
   const [colorState, setColorState] = useState<IColorState>();
   const [imageData, setImageData] = useState<ImageData>();
 
-  const previewImage = useMemo(() => {
+  const preview = useMemo(() => {
     if (imageData) {
       const canvas = document.createElement('canvas');
       canvas.width = imageData.width;
@@ -28,13 +28,13 @@ export const useMousePreviewColor = () => {
   }, [imageData]);
   /**
    * 鼠标移动事件处理函数
-   * @param stage
+   * @param e
    */
-  const onMouseMoveHandle = (stage: Konva.Stage) => {
+  const onMouseColorMoveHandler = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    const stage = e.target?.getStage();
+    if (!stage) return;
     const pos = stage.getPointerPosition();
-    if (!pos) {
-      return;
-    }
+    if (!pos) return;
     const x = Number(pos.x.toFixed(0));
     const y = Number(pos.y.toFixed(0));
     setPos({ x, y });
@@ -64,7 +64,7 @@ export const useMousePreviewColor = () => {
   return {
     pos,
     color: colorState,
-    previewImage,
-    onMouseMoveHandle
+    preview,
+    onMouseColorMoveHandler
   };
 };

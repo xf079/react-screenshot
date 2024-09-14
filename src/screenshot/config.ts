@@ -1,3 +1,4 @@
+
 export const ToolColorList = [
   '#f5222d',
   '#fa541c',
@@ -5,7 +6,8 @@ export const ToolColorList = [
   '#52c41a',
   '#13c2c2',
   '#2f54eb',
-  '#722ed1'
+  '#722ed1',
+  '#eb2f96'
 ];
 
 export const rectDefaultOptions: IShapeOption = {

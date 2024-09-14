@@ -4,7 +4,7 @@ import { useMemoizedFn } from 'ahooks';
 import { ShotContext } from '../Context.tsx';
 
 export const useMouseShapeHandler = () => {
-  const { state } = useContext(ShotContext);
+  const { state, dispatch } = useContext(ShotContext);
   // 是否开始绘制截图区域
   const isDrawing = useRef(false);
   // 开始绘制的位置
@@ -34,6 +34,7 @@ export const useMouseShapeHandler = () => {
         ) {
           isDrawing.current = true;
           start.current = { x: e.evt.layerX, y: e.evt.layerY };
+          dispatch({ type: 'SET_MODE', payload: 'shape' });
           setCurrent({ ...state.action, ...start.current });
         }
       }
@@ -55,6 +56,7 @@ export const useMouseShapeHandler = () => {
   const onShapeMouseUpHandler = useMemoizedFn(() => {
     if (isDrawing.current && current) {
       isDrawing.current = false;
+      dispatch({ type: 'SET_MODE', payload: undefined });
       setList(list.concat(current));
       setCurrent(undefined);
     }

@@ -10,7 +10,6 @@ export const ShapeRect: FC<IShapeRectProps> = ({ shape }) => {
   const shapeRef = useRef<Konva.Rect>(null);
   const shapeTrRef = useRef<Konva.Transformer>(null);
   const [isSelect, setIsSelect] = useState(false);
-
   const onArronTap = () => {
     setIsSelect(true);
   };
@@ -23,8 +22,8 @@ export const ShapeRect: FC<IShapeRectProps> = ({ shape }) => {
     return {
       x: minX,
       y: minY,
-      width: maxX - minX,
-      height: maxY - minY
+      width: shape.endX !== undefined ? maxX - minX : 0,
+      height: shape.endY !== undefined ? maxY - minY : 0
     };
   }, [shape]);
 
@@ -40,6 +39,8 @@ export const ShapeRect: FC<IShapeRectProps> = ({ shape }) => {
       }
     }
   }, [isSelect]);
+
+  if(!shape) return null;
   return (
     <Fragment>
       <Rect

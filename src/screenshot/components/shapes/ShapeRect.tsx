@@ -121,7 +121,8 @@ export const ShapeRect: FC<IShapeRectProps> = ({
         width={rectState.width}
         height={rectState.height}
         stroke={shape.options?.color}
-        strokeWidth={shape.options?.size}
+        strokeHitEnabled={true}
+        strokeWidth={shape.options?.full ? 0 : shape.options?.size}
         fill={shape.options?.full ? shape.options?.color : 'transparent'}
         opacity={(shape.options?.opacity || 0) / 100}
         cornerRadius={shape.options?.radius ? 5 : 0}
@@ -146,7 +147,7 @@ export const ShapeRect: FC<IShapeRectProps> = ({
             stage.container().style.cursor = 'move';
           }
         }}
-        draggable={selected === shape.id}
+        draggable
         dragBoundFunc={onShapeDragBoundFunc}
         hitStrokeWidth={shape.options?.size}
         hitFunc={hitFunc}
@@ -174,13 +175,6 @@ export const ShapeRect: FC<IShapeRectProps> = ({
             'top-center',
             'bottom-center'
           ]}
-          boundBoxFunc={(oldBox, newBox) => {
-            // limit resize
-            if (Math.abs(newBox.width) < 5 || Math.abs(newBox.height) < 5) {
-              return oldBox;
-            }
-            return newBox;
-          }}
         />
       )}
     </Fragment>

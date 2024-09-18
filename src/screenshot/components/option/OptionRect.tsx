@@ -28,9 +28,9 @@ export const OptionRect: FC<IRectOptions> = memo((props) => {
           </span>
           <Slider
             defaultValue={[state.size || 0]}
-            min={1}
-            max={100}
-            step={1}
+            min={5}
+            max={15}
+            step={5}
             value={[state.size || 0]}
             className='w-[60px]'
             onValueChange={(values) => {

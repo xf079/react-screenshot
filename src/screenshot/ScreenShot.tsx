@@ -62,7 +62,7 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
   /**
    * 当前选中的图形的id
    */
-  const [selected, setSelected] = useState<string>();
+  const [selected, updateSelected] = useState<string>();
 
   /**
    * 添加图形的最大索引
@@ -122,7 +122,9 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
     shape,
     updateMode,
     updateIndex,
-    updateShape
+    updateSelected,
+    updateShape,
+    updateList
   });
 
   const sizeRect = useMemo(() => {
@@ -261,6 +263,7 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
             y={0}
             width={width}
             height={height}
+            listening={false}
             fill='rgba(0,0,0,0.5)'
           />
           {shot ? (
@@ -322,7 +325,7 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
               list={shapes}
               shot={shot}
               selected={selected}
-              onSelected={setSelected}
+              onSelected={updateSelected}
             />
           )}
         </Layer>

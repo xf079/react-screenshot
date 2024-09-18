@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { MutableRefObject, useRef } from 'react';
+import { Dispatch, MutableRefObject, SetStateAction, useRef } from 'react';
 import { useMemoizedFn } from 'ahooks';
 import { SHAPE_MIN_SIZE } from '../constants';
 
@@ -17,9 +17,11 @@ export interface IShapeHandlerOptions {
   index: number;
   shape?: IShapeType;
   action?: IToolActionType;
-  updateMode: (mode?: IModeType) => void;
-  updateIndex: (index: number) => void;
-  updateShape: (shape: IShapeType) => void;
+  updateMode: Dispatch<SetStateAction<IModeType|undefined>>;
+  updateIndex: Dispatch<SetStateAction<number>>;
+  updateSelected: Dispatch<SetStateAction<string|undefined>>;
+  updateShape: Dispatch<SetStateAction<IShapeType | undefined>>;
+  updateList: Dispatch<SetStateAction<IShapeType[]>>;
 }
 
 export const useMouseShapeHandler = (options: IShapeHandlerOptions) => {
@@ -28,10 +30,13 @@ export const useMouseShapeHandler = (options: IShapeHandlerOptions) => {
     shot,
     mode,
     index,
+    shape,
     action,
     updateMode,
     updateShape,
-    updateIndex
+    updateSelected,
+    updateIndex,
+    updateList
   } = options;
   // 开始绘制的位置
   const start = useRef<IMouseStartType>();
@@ -60,6 +65,7 @@ export const useMouseShapeHandler = (options: IShapeHandlerOptions) => {
             index: index + 1,
             id: String(Date.now())
           };
+          updateSelected(undefined)
           updateMode('shape');
           updateIndex(index + 1);
         }
@@ -105,6 +111,12 @@ export const useMouseShapeHandler = (options: IShapeHandlerOptions) => {
       isDrawing.current = false;
       start.current = undefined;
       updateMode(undefined);
+      if (shape) {
+        updateList((prevState) => {
+          return [...prevState, shape];
+        });
+        updateShape(undefined);
+      }
     }
   });
 

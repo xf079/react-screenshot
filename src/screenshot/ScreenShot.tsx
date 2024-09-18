@@ -1,29 +1,22 @@
-import {
-  FC,
-  Fragment,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react';
+import { FC, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { Image, Layer, Rect, Stage, Transformer } from 'react-konva';
-import { useMemoizedFn } from 'ahooks';
 import Konva from 'konva';
+
+import { useMouseShotHandler } from './hooks/useMouseShotHandler';
+import { useMouseShapeHandler } from './hooks/useMouseShapeHandler';
+import { useMousePreviewColor } from './hooks/useMousePreviewColor';
+import { useShotBoundHandler } from './hooks/useShotBoundHandler';
+import { ShotMousePreviewRect } from './components/ShotMousePreviewRect';
+import { ShotSizeContainer } from './components/ShotSizeContainer';
+import { ShotToolsContainer } from './components/ShotToolsContainer';
+import { Shapes } from './components/shapes';
 import {
   SHOT_TOOLBAR_HEIGHT,
   SHOT_TOOLBAR_MODAL_HEIGHT,
   SHOT_TOOLBAR_SPLIT,
   SHOT_TOOLBAR_WIDTH
 } from './constants';
-import { useMouseShotHandler } from './hooks/useMouseShotHandler';
-import { useMouseShapeHandler } from './hooks/useMouseShapeHandler.ts';
-import { useMousePreviewColor } from './hooks/useMousePreviewColor';
-import { ShotMousePreviewRect } from './components/ShotMousePreviewRect';
-import { ShotSizeContainer } from './components/ShotSizeContainer';
-import { ShotToolsContainer } from './components/ShotToolsContainer';
-import { Shapes } from './components/shapes';
-import { ShotContext } from './Context';
+import { useMemoizedFn, useUpdateEffect } from 'ahooks';
 
 export interface ScreenShotProps {
   image: string;
@@ -35,15 +28,52 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
   const source = useRef(new window.Image());
   const [ready, setReady] = useState(false);
 
-  const { state, dispatch } = useContext(ShotContext);
+  // 是否开始绘制截图区域
+  const isDrawing = useRef(false);
 
-  // 是否正在拖动截图区域
-  const [isDragMove, setIsDragMove] = useState(false);
+  /**
+   * 截图区域数据
+   */
+  const [shot, updateShot] = useState<IShotRect>();
 
-  // 区域圆角
-  const [shotRadius, setShotRadius] = useState(10);
-  // 是否显示阴影
-  const [showShadow, setShowShadow] = useState(false);
+  /**
+   * 图形列表
+   */
+  const [list, updateList] = useState<IShapeType[]>([]);
+
+  /**
+   * 当前操作模式
+   */
+  const [mode, updateMode] = useState<IModeType>();
+
+  /**
+   * 当前工具
+   */
+  const [action, updateAction] = useState<IToolActionType>();
+
+  /**
+   * 当前绘制的图形
+   */
+  const [shape, updateShape] = useState<IShapeType>();
+
+  /**
+   * 当前选中的图形的id
+   */
+  const [selected, setSelected] = useState<string>();
+
+  /**
+   * 添加图形的最大索引
+   */
+  const [index, updateIndex] = useState(1);
+
+  /**
+   * 区域圆角
+   */
+  const [radius, setRadius] = useState(10);
+  /**
+   * 是否显示阴影
+   */
+  const [shadow, setShadow] = useState(false);
 
   const shotRef = useRef<Konva.Rect>(null);
   const shotTrRef = useRef<Konva.Transformer>(null);
@@ -52,41 +82,68 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
     useMousePreviewColor();
 
   const {
+    isDragMove,
+    onShotDragStart,
+    onShotDragEnd,
+    onShotDragBoundFunc,
+    onShotTransformStart,
+    onShotTransformEnd
+  } = useShotBoundHandler({
+    width,
+    height,
+    shot,
+    updateShot
+  });
+
+  const {
     onShotMouseDownHandler,
     onShotMouseMoveHandler,
     onShotMouseOutHandler
-  } = useMouseShotHandler();
+  } = useMouseShotHandler({
+    isDrawing,
+    shot,
+    mode,
+    updateShot,
+    updateMode
+  });
   const {
-    shapes,
     onShapeMouseDownHandler,
     onShapeMouseMoveHandler,
     onShapeMouseUpHandler
-  } = useMouseShapeHandler();
+  } = useMouseShapeHandler({
+    isDrawing,
+    shot,
+    mode,
+    index,
+    action,
+    shape,
+    updateMode,
+    updateIndex,
+    updateShape,
+    onShapeDrawingEnd: () => {
+      if (shape) {
+        console.log(22);
+      }
+    }
+  });
 
   const sizeRect = useMemo(() => {
-    if (!state.shot) return { x: 0, y: 0 };
-    const shotW = state.shot.width || 0;
-    const shotY = state.shot.y || 0;
-    const shotX = state.shot.x || 0;
+    if (!shot) return { x: 0, y: 0 };
+    const { x: shotX = 0, y: shotY = 0, width: shotW = 0 } = shot;
     const y = shotY > 34 ? shotY - 34 : shotY + 10;
     const x =
-      shotW > 325 ? shotX + 6 : width - shotX > 325 ? shotX + 6 : width - 325;
-    return {
-      x: x,
-      y: y
-    };
-  }, [width, state.shot]);
+      shotW > 444 ? shotX + 6 : width - shotX > 444 ? shotX + 6 : width - 444;
+    return { x, y };
+  }, [shot, width]);
 
-  const toolsRect = useMemo<{
-    x: number;
-    y: number;
-    position: 'top' | 'bottom';
-  }>(() => {
-    if (!state.shot) return { x: 0, y: 0, position: 'top' };
-    const shotH = state.shot.height || 0;
-    const shotW = state.shot.width || 0;
-    const shotY = state.shot.y || 0;
-    const shotX = state.shot.x || 0;
+  const toolsRect = useMemo<IToolRectType>(() => {
+    if (!shot) return { x: 0, y: 0, position: 'top' };
+    const {
+      x: shotX = 0,
+      y: shotY = 0,
+      width: shotW = 0,
+      height: shotH = 0
+    } = shot;
 
     const pendY = shotY + shotH;
     const pendX = shotX + shotW;
@@ -111,124 +168,48 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
         : 'top';
 
     return { x, y, position };
-  }, [height, state.shot]);
+  }, [height, shot]);
 
-  const onShotDragStart = () => {
-    setIsDragMove(true);
-  };
+  const shapes = useMemo(() => {
+    return (shape ? [...list, shape] : list).sort((a, b) => a.index - b.index);
+  }, [list, shape]);
 
-  /**
-   * 截图区域的鼠标拖动移动事件
-   * @param e 鼠标事件对象
-   */
-  const onShotDragMove = useMemoizedFn(() => {
-    if (!isDragMove) {
-      setIsDragMove(true);
-    }
-  });
-
-  /**
-   * 截图区域的鼠标拖动结束事件
-   * @param e 鼠标事件对象
-   */
-  const onShotDragEnd = useMemoizedFn(() => {
-    dispatch({
-      type: 'SET_SHOT',
-      payload: {
-        x: shotRef.current?.x(),
-        y: shotRef.current?.y(),
-        width: shotRef.current?.width(),
-        height: shotRef.current?.height()
-      }
-    });
-    if (isDragMove) {
-      setIsDragMove(false);
-    }
-  });
-
-  /**
-   * 截图区域的拖动边界限制
-   */
-  const onShotDragBoundFunc = useMemoizedFn((pos: Konva.Vector2d) => {
-    let x = pos.x;
-    let y = pos.y;
-    const shotW = state.shot?.width || 0;
-    const shotH = state.shot?.height || 0;
-    const maxX = width - shotW;
-    const maxY = height - shotH;
-    if (x < 0) {
-      x = 0;
-    } else if (x > maxX) {
-      x = maxX;
-    }
-    if (y < 0) {
-      y = 0;
-    } else if (y > maxY) {
-      y = maxY;
-    }
-
-    return { x, y };
-  });
-
-  /**
-   * 截图区域变化更新区域数据
-   */
-  const onShotTransformer = () => {
-    const target = shotRef.current;
-    if (target) {
-      const scaleX = Math.abs(target.scaleX());
-      const scaleY = Math.abs(target.scaleY());
-      target.scaleX(1);
-      target.scaleY(1);
-      dispatch({
-        type: 'SET_SHOT',
-        payload: {
-          x: target.x(),
-          y: target.y(),
-          width: Math.max(5, target.width() * scaleX),
-          height: Math.max(5, target.height() * scaleY)
+  const onUpdateActionShapeOptions = useMemoizedFn((tool: IToolActionType) => {
+    const currentIndex = list.findIndex((item) => item.id === selected);
+    if (currentIndex !== -1) {
+      const updatedList = [...list];
+      updatedList[currentIndex] = {
+        ...updatedList[currentIndex],
+        options: {
+          ...updatedList[currentIndex].options,
+          ...tool.options
         }
-      });
+      };
+      updateList(updatedList);
     }
-  };
+  });
 
-  /**
-   * 截图区域变换结束更新区域数据
-   */
-  const onShotTransformEnd = () => {
-    const target = shotRef.current;
-    if (target) {
-      const scaleX = Math.abs(target.scaleX());
-      const scaleY = Math.abs(target.scaleY());
-      target.scaleX(1);
-      target.scaleY(1);
-
-      dispatch({
-        type: 'SET_SHOT',
-        payload: {
-          x: target.x(),
-          y: target.y(),
-          width: Math.max(5, target.width() * scaleX),
-          height: Math.max(5, target.height() * scaleY)
-        }
-      });
-    }
-    setIsDragMove(false);
-  };
+  useUpdateEffect(() => {
+    console.log(selected);
+  }, [selected]);
 
   useEffect(() => {
-    if (state.shot && shotRef.current && shotTrRef.current) {
+    if (shot && shotRef.current && shotTrRef.current) {
       shotTrRef.current?.nodes([shotRef.current]);
       shotTrRef.current?.getLayer()?.batchDraw();
     }
-  }, [state.shot]);
+  }, [shot]);
 
   useEffect(() => {
     source.current.src = image;
     source.current.onload = () => {
       setReady(true);
     };
-  }, []);
+  }, [image]);
+
+  console.log(action,shape)
+
+  console.log(shapes)
 
   return (
     <div id='screenshot' style={{ position: 'relative' }}>
@@ -236,27 +217,27 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
         width={width}
         height={height}
         onMouseDown={(e) => {
-          if (!state.shot) {
+          console.log('down');
+          if (!shot) {
             onShotMouseDownHandler(e);
           } else {
             onShapeMouseDownHandler(e);
           }
         }}
         onMouseMove={(e) => {
-          if (state.mode === 'shot') {
+          if (mode === 'shot') {
             onShotMouseMoveHandler(e);
-          } else if (state.mode === 'shape') {
+          } else if (mode === 'shape') {
             onShapeMouseMoveHandler(e);
           } else {
             onMouseColorMoveHandler(e);
           }
         }}
         onMouseUp={() => {
-          console.log('out');
-          if (state.mode === 'shot') {
+          if (mode === 'shot') {
             onShotMouseOutHandler();
           }
-          if (state.mode === 'shape') {
+          if (mode === 'shape') {
             onShapeMouseUpHandler();
           }
         }}
@@ -280,26 +261,23 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
             height={height}
             fill='rgba(0,0,0,0.5)'
           />
-          {state.shot ? (
+          {shot ? (
             <Fragment>
               <Rect
                 ref={shotRef}
-                width={state.shot.width}
-                height={state.shot.height}
-                x={state.shot.x}
-                y={state.shot.y}
+                width={shot.width}
+                height={shot.height}
+                x={shot.x}
+                y={shot.y}
                 fill='rgba(0,0,0,0.91)'
-                draggable={!state.action}
-                cornerRadius={shotRadius}
+                draggable={!action}
+                cornerRadius={radius}
                 shadowColor='#000'
-                shadowEnabled={showShadow}
-                dragBoundFunc={onShotDragBoundFunc}
+                shadowEnabled={shadow}
                 globalCompositeOperation='destination-out'
-                onTransformStart={onShotDragStart}
-                onDragMove={onShotDragMove}
+                dragBoundFunc={onShotDragBoundFunc}
+                onDragStart={onShotDragStart}
                 onDragEnd={onShotDragEnd}
-                onTransform={onShotTransformer}
-                onTransformEnd={onShotTransformEnd}
               />
               <Transformer
                 ref={shotTrRef}
@@ -324,10 +302,12 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
                   'top-center',
                   'bottom-center'
                 ]}
+                onTransformStart={onShotTransformStart}
+                onTransformEnd={onShotTransformEnd}
               />
             </Fragment>
           ) : null}
-          {preview && color && pos && !state.shot ? (
+          {preview && color && pos && !shot ? (
             <ShotMousePreviewRect
               pos={pos}
               color={color}
@@ -335,40 +315,36 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
               primaryColor='#1677ff'
             />
           ) : null}
-          <Shapes list={shapes} />
+          <Shapes list={shapes} selected={selected} onSelected={setSelected} />
         </Layer>
       </Stage>
-      {!isDragMove && state.shot ? (
-        <ShotSizeContainer
-          windowWidth={width}
-          windowHeight={height}
-          width={state.shot.width || 0}
-          height={state.shot.height || 0}
-          x={sizeRect.x}
-          y={sizeRect.y}
-          radius={shotRadius}
-          shadow={showShadow}
-          onRectChange={(_w, _h) => {
-            dispatch({
-              type: 'SET_SHOT',
-              payload: {
-                ...state.shot,
-                width: _w,
-                height: _h
-              }
-            });
-          }}
-          onRadiusChange={setShotRadius}
-          onShadowChange={setShowShadow}
-        />
-      ) : null}
-      {!isDragMove && state.shot ? (
-        <ShotToolsContainer
-          x={toolsRect.x}
-          y={toolsRect.y}
-          position={toolsRect.position}
-        />
-      ) : null}
+      {!isDragMove && shot && (
+        <Fragment>
+          <ShotSizeContainer
+            windowWidth={width}
+            windowHeight={height}
+            width={shot.width || 0}
+            height={shot.height || 0}
+            x={sizeRect.x}
+            y={sizeRect.y}
+            radius={radius}
+            shadow={shadow}
+            onRectChange={(_w, _h) => {
+              updateShot({ ...shot, width: _w, height: _h });
+            }}
+            onRadiusChange={setRadius}
+            onShadowChange={setShadow}
+          />
+          <ShotToolsContainer
+            x={toolsRect.x}
+            y={toolsRect.y}
+            position={toolsRect.position}
+            action={action}
+            onSelect={updateAction}
+            onUpdate={onUpdateActionShapeOptions}
+          />
+        </Fragment>
+      )}
     </div>
   );
 };

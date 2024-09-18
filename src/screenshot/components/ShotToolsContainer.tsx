@@ -1,5 +1,5 @@
-import { FC, useContext } from 'react';
-import { useLocalStorageState, useMemoizedFn } from 'ahooks';
+import { FC, useState } from 'react';
+import { useMemoizedFn } from 'ahooks';
 import {
   TooltipContent,
   TooltipProvider,
@@ -12,7 +12,6 @@ import {
   PopoverTrigger
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { ShotContext } from '@/screenshot/Context';
 import { OptionRect, OptionCircle, OptionLine, OptionArrow } from './option';
 import { ToolList, ToolSimpleList } from '../config';
 import { ToolIconList } from '../icon';
@@ -21,71 +20,40 @@ export interface ShotToolsContainerProps {
   x: number;
   y: number;
   position: 'top' | 'bottom';
+  action?: IToolActionType;
+  onSelect: (item: IToolActionType) => void;
+  onUpdate: (options: IToolActionType) => void;
 }
 
 export const ShotToolsContainer: FC<ShotToolsContainerProps> = (props) => {
-  const { state, dispatch } = useContext(ShotContext);
-  const [tools, updateTools] = useLocalStorageState('local-tools', {
-    defaultValue: ToolList.map((item) => ({
-      ...item,
-      options: Object.assign({}, item.options, {})
-    })),
-    listenStorageChange: true
-  });
-
-  const onItemOptionAction = (item: IToolType) => {
-    dispatch({
-      type: 'UPDATE_ACTION',
-      payload: {
-        type: item.type,
-        options: item.options
-      }
-    });
-  };
-
-  const onItemAction = (item: IToolSimpleType) => {
-    dispatch({
-      type: 'UPDATE_ACTION',
-      payload: {
-        type: item.type
-      }
-    });
-  };
-
-  const onOptionsUpdate = useMemoizedFn((options: IShapeOption) => {
-    if (state.action) {
-      dispatch({
-        type: 'UPDATE_ACTION',
-        payload: {
-          ...state.action,
-          options
-        }
+  const [tools, updateTools] = useState(ToolList);
+  
+  const onOptionsUpdate = useMemoizedFn(
+    (tool: IToolType, options: IShapeOption) => {
+      updateTools((prevState) => {
+        const updatedTools = prevState.map((t) => {
+          if (t.type === tool.type) {
+            return { ...t, options: { ...t.options, ...options } };
+          }
+          return t;
+        });
+        return updatedTools;
       });
-      if (tools) {
-        updateTools(
-          tools.map((item) => {
-            if (item.type === state.action?.type) {
-              return {
-                ...item,
-                options
-              };
-            }
-            return item;
-          })
-        );
+      if (props.action) {
+        props.onUpdate({ type: tool.type, options: options });
       }
     }
-  });
+  );
 
   return (
     <div
-      className='flex flex-row justify-start items-center absolute z-[99] h-10 gap-2 px-3 bg-white bg-opacity-75 backdrop-filter backdrop-blur-md rounded-sm'
+      className='flex flex-row justify-start items-center absolute z-[99] h-10 gap-1 px-2 bg-white bg-opacity-75 backdrop-filter backdrop-blur-md rounded-sm'
       style={{ left: `${props.x}px`, top: `${props.y}px` }}
     >
-      {(tools || []).map((tool) => {
+      {tools.map((tool) => {
         const Icon = ToolIconList[tool.type];
         return (
-          <Popover key={tool.type} open={state.action?.type === tool.type}>
+          <Popover key={tool.type} open={props.action?.type === tool.type}>
             <TooltipProvider>
               <Tooltip>
                 <PopoverTrigger asChild>
@@ -94,11 +62,16 @@ export const ShotToolsContainer: FC<ShotToolsContainerProps> = (props) => {
                       key={tool.type}
                       className={cn(
                         'w-8 h-8 flex flex-row justify-center items-center cursor-pointer transition-all duration-200 rounded-sm hover:bg-black hover:bg-opacity-20',
-                        state.action?.type === tool.type
+                        props.action?.type === tool.type
                           ? 'bg-black bg-opacity-20'
                           : ''
                       )}
-                      onClick={() => onItemOptionAction(tool)}
+                      onClick={() => {
+                        props.onSelect?.({
+                          type: tool.type,
+                          options: tool.options
+                        });
+                      }}
                     >
                       <Icon className='w-4 h-4' />
                     </div>
@@ -122,25 +95,33 @@ export const ShotToolsContainer: FC<ShotToolsContainerProps> = (props) => {
               {tool.type === 'Rect' && (
                 <OptionRect
                   options={tool.options}
-                  onUpdateOptions={onOptionsUpdate}
+                  onUpdateOptions={(_options) =>
+                    onOptionsUpdate(tool, _options)
+                  }
                 />
               )}
               {tool.type === 'Circle' && (
                 <OptionCircle
                   options={tool.options}
-                  onUpdateOptions={onOptionsUpdate}
+                  onUpdateOptions={(_options) =>
+                    onOptionsUpdate(tool, _options)
+                  }
                 />
               )}
               {tool.type === 'Line' && (
                 <OptionLine
                   options={tool.options}
-                  onUpdateOptions={onOptionsUpdate}
+                  onUpdateOptions={(_options) =>
+                    onOptionsUpdate(tool, _options)
+                  }
                 />
               )}
               {tool.type === 'Arrow' && (
                 <OptionArrow
                   options={tool.options}
-                  onUpdateOptions={onOptionsUpdate}
+                  onUpdateOptions={(_options) =>
+                    onOptionsUpdate(tool, _options)
+                  }
                 />
               )}
             </PopoverContent>
@@ -153,7 +134,9 @@ export const ShotToolsContainer: FC<ShotToolsContainerProps> = (props) => {
           <div
             key={tool.type}
             className='w-8 h-8 flex flex-row justify-center items-center cursor-pointer transition-all duration-200 rounded-sm hover:bg-black hover:bg-opacity-20'
-            onClick={() => onItemAction(tool)}
+            onClick={() => {
+              props.onSelect({ type: tool.type });
+            }}
           >
             <Icon className='w-4 h-4' />
           </div>

@@ -1,41 +1,69 @@
 import Konva from 'konva';
-import { useContext, useMemo, useRef, useState } from 'react';
+import { MutableRefObject, useRef } from 'react';
 import { useMemoizedFn } from 'ahooks';
-import { ShotContext } from '../Context.tsx';
+import { SHAPE_MIN_SIZE } from '../constants';
 
-export const useMouseShapeHandler = () => {
-  const { state, dispatch } = useContext(ShotContext);
-  // 是否开始绘制截图区域
-  const isDrawing = useRef(false);
+interface IMouseStartType {
+  x: number;
+  y: number;
+  id: string;
+  index: number;
+}
+
+export interface IShapeHandlerOptions {
+  isDrawing: MutableRefObject<boolean>;
+  shot?: IShotRect;
+  mode?: IModeType;
+  index: number;
+  shape?: IShapeType;
+  action?: IToolActionType;
+  updateMode: (mode?: IModeType) => void;
+  updateIndex: (index: number) => void;
+  updateShape: (shape: IShapeType) => void;
+  onShapeDrawingEnd: () => void;
+}
+
+export const useMouseShapeHandler = (options: IShapeHandlerOptions) => {
+  const {
+    isDrawing,
+    shot,
+    mode,
+    index,
+    action,
+    updateMode,
+    updateShape,
+    updateIndex,
+    onShapeDrawingEnd
+  } = options;
   // 开始绘制的位置
-  const start = useRef({ x: 0, y: 0 });
+  const start = useRef<IMouseStartType>();
 
-  const [list, setList] = useState<IShapeType[]>([]);
-  const [current, setCurrent] = useState<IShapeType>();
-
-  const shapes = useMemo<IShapeType[]>(
-    () => (current ? [...list, current] : list),
-    [list, current]
-  );
-
+  /**
+   * 开始绘制自定义图形
+   */
   const onShapeMouseDownHandler = useMemoizedFn(
     (e: Konva.KonvaEventObject<MouseEvent>) => {
-      if (e.evt.button === 0 && state.shot) {
-        // 判断点击位置是否在截图区域内
+      if (e.evt.button === 0 && shot && !mode) {
         const x = e.evt.layerX;
         const y = e.evt.layerY;
-        const { x: rectX, y: rectY, width, height } = state.shot;
+        const { x: rectX, y: rectY, width, height } = shot;
+        // 判断点击位置是否在截图区域内
         if (
           x >= rectX! &&
           x <= rectX! + width! &&
           y >= rectY! &&
           y <= rectY! + height! &&
-          state.action
+          action
         ) {
           isDrawing.current = true;
-          start.current = { x: e.evt.layerX, y: e.evt.layerY };
-          dispatch({ type: 'SET_MODE', payload: 'shape' });
-          setCurrent({ ...state.action, ...start.current });
+          start.current = {
+            x: e.evt.layerX,
+            y: e.evt.layerY,
+            index: index + 1,
+            id: String(Date.now())
+          };
+          updateMode('shape');
+          updateIndex(index + 1);
         }
       }
     }
@@ -43,28 +71,48 @@ export const useMouseShapeHandler = () => {
 
   const onShapeMouseMoveHandler = useMemoizedFn(
     (e: Konva.KonvaEventObject<MouseEvent>) => {
-      if (isDrawing.current) {
-        const endX = e.evt.layerX;
-        const endY = e.evt.layerY;
-        if (current) {
-          setCurrent({ ...current, endX, endY });
+      if (isDrawing.current && start.current && shot) {
+        let { layerX: endX, layerY: endY } = e.evt;
+        const { x, y, width, height } = shot;
+        if (endX <= x) {
+          endX = x;
+        }
+        if (endX >= x + width) {
+          endX = x + width;
+        }
+        if (endY <= y) {
+          endY = y;
+        }
+        if (endY >= y + height) {
+          endY = y + height;
+        }
+        if (
+          Math.abs(endX - start.current.x) > SHAPE_MIN_SIZE &&
+          Math.abs(endY - start.current.y) > SHAPE_MIN_SIZE &&
+          action
+        ) {
+          updateShape({
+            ...action,
+            ...start.current,
+            endX,
+            endY
+          });
         }
       }
     }
   );
 
   const onShapeMouseUpHandler = useMemoizedFn(() => {
-    if (isDrawing.current && current) {
+    if (isDrawing.current && start.current && shot) {
       isDrawing.current = false;
-      dispatch({ type: 'SET_MODE', payload: undefined });
-      setList(list.concat(current));
-      setCurrent(undefined);
+      start.current = undefined;
+      updateMode(undefined);
+      onShapeDrawingEnd();
     }
   });
 
   return {
     isDrawing,
-    shapes,
     onShapeMouseDownHandler,
     onShapeMouseMoveHandler,
     onShapeMouseUpHandler

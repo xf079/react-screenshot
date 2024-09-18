@@ -84,7 +84,7 @@ export const OptionRect: FC<IRectOptions> = memo((props) => {
         >
           <Checkbox checked={state.full} />
           <span className='flex-shrink-0 text-xs text-stone-900 text-opacity-90'>
-            空心
+            实心
           </span>
         </div>
         <div

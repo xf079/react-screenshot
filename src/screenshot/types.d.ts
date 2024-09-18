@@ -5,6 +5,14 @@ interface IShotRect {
   height: number;
 }
 
+type IModeType = 'shot'|'shape'|'drag'
+
+interface IToolRectType{
+  x: number;
+  y: number;
+  position: 'top'|'bottom'
+}
+
 interface IShapeOption {
   size?: number;
   opacity?: number;
@@ -52,10 +60,19 @@ interface ISelectToolOptionType {
 }
 
 interface IShapeType {
+  id: string;
   type: IOptionsKeyType;
   options?: IShapeOption;
-  x?: number;
-  y?: number;
-  endX?: number;
-  endY?: number;
+  index: number;
+  x: number;
+  y: number;
+  endX: number;
+  endY: number;
+}
+
+
+
+interface IToolActionType{
+  type: IOptionsKeyType;
+  options?: IOptionShape;
 }

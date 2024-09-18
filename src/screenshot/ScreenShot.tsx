@@ -1,5 +1,6 @@
 import { FC, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { Image, Layer, Rect, Stage, Transformer } from 'react-konva';
+import { useMemoizedFn } from 'ahooks';
 import Konva from 'konva';
 
 import { useMouseShotHandler } from './hooks/useMouseShotHandler';
@@ -16,7 +17,7 @@ import {
   SHOT_TOOLBAR_SPLIT,
   SHOT_TOOLBAR_WIDTH
 } from './constants';
-import { useMemoizedFn, useUpdateEffect } from 'ahooks';
+import { ToolList } from '@/screenshot/config';
 
 export interface ScreenShotProps {
   image: string;
@@ -27,6 +28,8 @@ export interface ScreenShotProps {
 const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
   const source = useRef(new window.Image());
   const [ready, setReady] = useState(false);
+
+  const [tools, updateTools] = useState<IToolType[]>(ToolList);
 
   // 是否开始绘制截图区域
   const isDrawing = useRef(false);
@@ -119,12 +122,7 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
     shape,
     updateMode,
     updateIndex,
-    updateShape,
-    onShapeDrawingEnd: () => {
-      if (shape) {
-        console.log(22);
-      }
-    }
+    updateShape
   });
 
   const sizeRect = useMemo(() => {
@@ -174,24 +172,33 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
     return (shape ? [...list, shape] : list).sort((a, b) => a.index - b.index);
   }, [list, shape]);
 
-  const onUpdateActionShapeOptions = useMemoizedFn((tool: IToolActionType) => {
-    const currentIndex = list.findIndex((item) => item.id === selected);
-    if (currentIndex !== -1) {
-      const updatedList = [...list];
-      updatedList[currentIndex] = {
-        ...updatedList[currentIndex],
-        options: {
-          ...updatedList[currentIndex].options,
-          ...tool.options
-        }
-      };
-      updateList(updatedList);
+  const onSelectActon = useMemoizedFn((tool: IToolActionType) => {
+    if (tool.options) {
+      updateAction(tool);
+    } else {
+      // updateAction(tool);
     }
   });
 
-  useUpdateEffect(() => {
-    console.log(selected);
-  }, [selected]);
+  const onUpdateActionOptions = useMemoizedFn((tool: IToolActionType) => {
+    const _tools = tools.map((item) => {
+      return item.type === tool.type
+        ? { ...item, options: tool.options }
+        : item;
+    });
+    updateTools(_tools);
+    updateAction(tool);
+    const _idx = list.findIndex((item) => item.id === selected);
+    if (_idx !== -1) {
+      const _list = list.map((item) => {
+        if (item.id === selected) {
+          return { ...item, options: tool.options };
+        }
+        return item;
+      });
+      updateList(_list);
+    }
+  });
 
   useEffect(() => {
     if (shot && shotRef.current && shotTrRef.current) {
@@ -207,17 +214,12 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
     };
   }, [image]);
 
-  console.log(action,shape)
-
-  console.log(shapes)
-
   return (
     <div id='screenshot' style={{ position: 'relative' }}>
       <Stage
         width={width}
         height={height}
         onMouseDown={(e) => {
-          console.log('down');
           if (!shot) {
             onShotMouseDownHandler(e);
           } else {
@@ -315,7 +317,14 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
               primaryColor='#1677ff'
             />
           ) : null}
-          <Shapes list={shapes} selected={selected} onSelected={setSelected} />
+          {shot && (
+            <Shapes
+              list={shapes}
+              shot={shot}
+              selected={selected}
+              onSelected={setSelected}
+            />
+          )}
         </Layer>
       </Stage>
       {!isDragMove && shot && (
@@ -336,12 +345,11 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
             onShadowChange={setShadow}
           />
           <ShotToolsContainer
-            x={toolsRect.x}
-            y={toolsRect.y}
-            position={toolsRect.position}
+            rect={toolsRect}
+            tools={tools}
             action={action}
-            onSelect={updateAction}
-            onUpdate={onUpdateActionShapeOptions}
+            onSelect={onSelectActon}
+            onUpdate={onUpdateActionOptions}
           />
         </Fragment>
       )}

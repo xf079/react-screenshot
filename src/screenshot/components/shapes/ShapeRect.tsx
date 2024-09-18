@@ -5,24 +5,26 @@ import { ShotContext } from '@/screenshot/Context';
 import { useMemoizedFn } from 'ahooks';
 
 export interface IShapeRectProps {
+  shot: IShotRect;
   shape: IShapeType;
   selected?: string;
   onSelected: (id: string) => void;
 }
 
 export const ShapeRect: FC<IShapeRectProps> = ({
-  selected,
   shape,
+  shot,
+  selected,
   onSelected
 }) => {
-  const { state, dispatch } = useContext(ShotContext);
+  const { dispatch } = useContext(ShotContext);
   const shapeRef = useRef<Konva.Rect>(null);
   const shapeTrRef = useRef<Konva.Transformer>(null);
 
   const onRectTap = (e: Konva.KonvaEventObject<MouseEvent>) => {
     e.cancelBubble = true;
     if (selected !== shape.id) {
-      onSelected(shape.id)
+      onSelected(shape.id);
     }
   };
 
@@ -56,10 +58,10 @@ export const ShapeRect: FC<IShapeRectProps> = ({
    * 图形的拖动边界限制
    */
   const onShapeDragBoundFunc = useMemoizedFn((pos: Konva.Vector2d) => {
-    if (!state.shot) return pos;
+    if (!shot) return pos;
     let currentX = pos.x;
     let currentY = pos.y;
-    const { x, y, width, height } = state.shot;
+    const { x, y, width, height } = shot;
     const maxX = x + width - rectState.width;
     const maxY = y + height - rectState.height;
     if (currentX < x) {
@@ -108,7 +110,7 @@ export const ShapeRect: FC<IShapeRectProps> = ({
     }
   }, [selected, shape.id]);
 
-  if (!shape) return null;
+  console.log(shape,rectState);
   return (
     <Fragment>
       <Rect

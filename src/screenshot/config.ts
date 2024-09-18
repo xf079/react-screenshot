@@ -12,7 +12,7 @@ export const ToolColorList = [
 
 export const rectDefaultOptions: IShapeOption = {
   size: 5,
-  opacity: 1,
+  opacity: 100,
   color: ToolColorList[0],
   full: false,
   radius: false
@@ -20,20 +20,20 @@ export const rectDefaultOptions: IShapeOption = {
 
 export const circleDefaultOptions: IShapeOption = {
   size: 5,
-  opacity: 1,
+  opacity: 100,
   color: ToolColorList[0],
   full: false
 };
 
 export const lineDefaultOptions: IShapeOption = {
-  size: 1,
-  opacity: 1,
+  size: 5,
+  opacity: 100,
   color: ToolColorList[0]
 };
 
 export const arrowDefaultOptions: IShapeOption = {
-  size: 1,
-  opacity: 1,
+  size: 5,
+  opacity: 100,
   color: ToolColorList[0]
 };
 

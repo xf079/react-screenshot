@@ -5,30 +5,34 @@ import { memo } from 'react';
 
 export interface ShapesProps {
   list: IShapeType[];
+  shot: IShotRect;
   selected?: string;
   onSelected: (id: string) => void;
 }
 
-export const Shapes = memo(({ list, selected, onSelected }: ShapesProps) => {
-  return (
-    <Group>
-      {list.map((item, index) => {
-        if (item.type === 'Rect') {
-          return (
-            <ShapeRect
-              shape={item}
-              key={index}
-              selected={selected}
-              onSelected={onSelected}
-            />
-          );
-        }
+export const Shapes = memo(
+  ({ list, shot, selected, onSelected }: ShapesProps) => {
+    return (
+      <Group>
+        {list.map((item, index) => {
+          if (item.type === 'Rect') {
+            return (
+              <ShapeRect
+                shape={item}
+                shot={shot}
+                key={index}
+                selected={selected}
+                onSelected={onSelected}
+              />
+            );
+          }
 
-        if (item.type === 'Arrow') {
-          return <ShapeArrow shape={item} key={index} />;
-        }
-        return null;
-      })}
-    </Group>
-  );
-});
+          if (item.type === 'Arrow') {
+            return <ShapeArrow shape={item} key={index} />;
+          }
+          return null;
+        })}
+      </Group>
+    );
+  }
+);

@@ -20,10 +20,10 @@ export const OptionRect: FC<IRectOptions> = memo((props) => {
   });
 
   return (
-    <div className='w-[315px] flex flex-row items-center gap-3'>
+    <div className='w-[320px] flex flex-row items-center gap-3'>
       <div className='flex flex-col gap-2'>
         <div className='flex flex-row justify-end items-center gap-2'>
-          <span className='w-9 text-right text-xs text-stone-900 text-opacity-90'>
+          <span className='w-12 text-right text-xs text-stone-900 text-opacity-90'>
             大小
           </span>
           <Slider
@@ -42,8 +42,8 @@ export const OptionRect: FC<IRectOptions> = memo((props) => {
           </span>
         </div>
         <div className='flex flex-row flex-shrink-0  justify-end items-center gap-2'>
-          <span className='w-9 text-right text-xs text-stone-900 text-opacity-90'>
-            透明度
+          <span className='w-12 text-right text-xs text-stone-900 text-opacity-90'>
+            不透明度
           </span>
           <Slider
             defaultValue={[state.opacity || 0]}
@@ -53,6 +53,7 @@ export const OptionRect: FC<IRectOptions> = memo((props) => {
             value={[state.opacity || 0]}
             className='w-[60px]'
             onValueChange={(values) => {
+              console.log(values);
               updateState({ ...state, opacity: values[0] });
             }}
           />

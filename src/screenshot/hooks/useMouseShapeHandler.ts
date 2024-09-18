@@ -20,7 +20,6 @@ export interface IShapeHandlerOptions {
   updateMode: (mode?: IModeType) => void;
   updateIndex: (index: number) => void;
   updateShape: (shape: IShapeType) => void;
-  onShapeDrawingEnd: () => void;
 }
 
 export const useMouseShapeHandler = (options: IShapeHandlerOptions) => {
@@ -32,8 +31,7 @@ export const useMouseShapeHandler = (options: IShapeHandlerOptions) => {
     action,
     updateMode,
     updateShape,
-    updateIndex,
-    onShapeDrawingEnd
+    updateIndex
   } = options;
   // 开始绘制的位置
   const start = useRef<IMouseStartType>();
@@ -107,7 +105,6 @@ export const useMouseShapeHandler = (options: IShapeHandlerOptions) => {
       isDrawing.current = false;
       start.current = undefined;
       updateMode(undefined);
-      onShapeDrawingEnd();
     }
   });
 

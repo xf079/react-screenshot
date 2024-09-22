@@ -1,78 +1,90 @@
-interface IShotRect {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
+import { Dispatch, SetStateAction } from 'react';
 
-type IModeType = 'shot'|'shape'|'drag'
+export {};
 
-interface IToolRectType{
-  x: number;
-  y: number;
-  position: 'top'|'bottom'
-}
+declare global {
+  interface IShotRect {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }
 
-interface IShapeOption {
-  size?: number;
-  opacity?: number;
-  color?: string;
-  full?: boolean;
-  radius?: boolean;
-}
+  type IModeType = 'shot' | 'shape' | 'drag';
 
-type IOptionActionKey =
-  | 'Rect'
-  | 'Circle'
-  | 'Line'
-  | 'Arrow'
-  | 'Pencil'
-  | 'Mosaic'
-  | 'Text';
+  interface IToolRectType {
+    x: number;
+    y: number;
+    position: 'top' | 'bottom';
+  }
 
-type IOptionsKeyType =
-  | IOptionActionKey
-  | 'Pinned'
-  | 'Refresh'
-  | 'Close'
-  | 'Download'
-  | 'Success';
+  interface IShapeOption {
+    size?: number;
+    opacity?: number;
+    color?: string;
+    full?: boolean;
+    radius?: boolean;
+  }
 
-interface IToolType {
-  type: IOptionActionKey;
-  title?: string;
-  width: number;
-  height: number;
-  options?: IShapeOption;
-}
+  type IOptionActionKey =
+    | 'Rect'
+    | 'Circle'
+    | 'Line'
+    | 'Arrow'
+    | 'Pencil'
+    | 'Mosaic'
+    | 'Text';
 
-interface IToolSimpleType {
-  type: IOptionsKeyType;
-  width: number;
-  height: number;
-}
+  type IOptionsKeyType =
+    | IOptionActionKey
+    | 'Pinned'
+    | 'Refresh'
+    | 'Close'
+    | 'Download'
+    | 'Success';
 
-type IToolOptionsType = Record<IOptionActionKey, IShapeOption>;
+  interface IToolType {
+    type: IOptionActionKey;
+    title?: string;
+    width: number;
+    height: number;
+    options?: IShapeOption;
+  }
 
-interface ISelectToolOptionType {
-  type: IOptionsKeyType;
-  options?: IOptionShape;
-}
+  interface IToolSimpleType {
+    type: IOptionsKeyType;
+    width: number;
+    height: number;
+  }
 
-interface IShapeType {
-  id: string;
-  type: IOptionsKeyType;
-  options?: IShapeOption;
-  index: number;
-  x: number;
-  y: number;
-  endX: number;
-  endY: number;
-}
+  type IToolOptionsType = Record<IOptionActionKey, IShapeOption>;
 
+  interface ISelectToolOptionType {
+    type: IOptionsKeyType;
+    options?: IOptionShape;
+  }
 
+  interface IShapeType {
+    id: string;
+    type: IOptionsKeyType;
+    options?: IShapeOption;
+    x: number;
+    y: number;
+    endX: number;
+    endY: number;
+  }
 
-interface IToolActionType{
-  type: IOptionsKeyType;
-  options?: IOptionShape;
+  interface IToolActionType {
+    type: IOptionsKeyType;
+    options?: IOptionShape;
+  }
+
+  interface ShapeBaseProps {
+    shot: IShotRect;
+    mode?: IModeType;
+    selected?: string;
+    updateSelected: Dispatch<SetStateAction<string | undefined>>;
+    updateMode: Dispatch<SetStateAction<IModeType | undefined>>;
+    onUpdateShapeState: (shape: IShapeType) => void;
+  }
 }

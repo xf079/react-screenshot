@@ -1,13 +1,13 @@
 import Konva from 'konva';
-import { Arrow, Circle, Group } from 'react-konva';
+import { Circle, Group, Line } from 'react-konva';
 import { FC, Fragment, useEffect, useRef } from 'react';
 import { useMemoizedFn } from 'ahooks';
 
-export interface IShapeArrowProps extends ShapeBaseProps {
+export interface IShapeLineProps extends ShapeBaseProps {
   shape: IShapeType;
 }
 
-export const ShapeArrow: FC<IShapeArrowProps> = ({
+export const ShapeLine: FC<IShapeLineProps> = ({
   shape,
   selected,
   updateSelected,
@@ -33,6 +33,7 @@ export const ShapeArrow: FC<IShapeArrowProps> = ({
       });
     }
   );
+
   useEffect(() => {
     if (selected === shape.id) {
       if (groupRef.current) {
@@ -40,6 +41,7 @@ export const ShapeArrow: FC<IShapeArrowProps> = ({
       }
     }
   }, [selected, shape.id]);
+
   return (
     <Group
       ref={groupRef}
@@ -58,7 +60,7 @@ export const ShapeArrow: FC<IShapeArrowProps> = ({
       }}
       onDragEnd={onShapeDragEndFunc}
     >
-      <Arrow
+      <Line
         ref={shapeRef}
         points={[shape.x, shape.y, shape.endX, shape.endY]}
         stroke={shape.options?.color}

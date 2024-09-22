@@ -1,3 +1,3 @@
-import ScreenShot from './ScreenShotApp.tsx';
+import ScreenShot from './ScreenShot.tsx';
 
 export { ScreenShot };

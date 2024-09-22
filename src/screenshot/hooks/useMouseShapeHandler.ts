@@ -7,18 +7,15 @@ interface IMouseStartType {
   x: number;
   y: number;
   id: string;
-  index: number;
 }
 
 export interface IShapeHandlerOptions {
   isDrawing: MutableRefObject<boolean>;
   shot?: IShotRect;
   mode?: IModeType;
-  index: number;
   shape?: IShapeType;
   action?: IToolActionType;
   updateMode: Dispatch<SetStateAction<IModeType|undefined>>;
-  updateIndex: Dispatch<SetStateAction<number>>;
   updateSelected: Dispatch<SetStateAction<string|undefined>>;
   updateShape: Dispatch<SetStateAction<IShapeType | undefined>>;
   updateList: Dispatch<SetStateAction<IShapeType[]>>;
@@ -29,13 +26,11 @@ export const useMouseShapeHandler = (options: IShapeHandlerOptions) => {
     isDrawing,
     shot,
     mode,
-    index,
     shape,
     action,
     updateMode,
     updateShape,
     updateSelected,
-    updateIndex,
     updateList
   } = options;
   // 开始绘制的位置
@@ -62,12 +57,10 @@ export const useMouseShapeHandler = (options: IShapeHandlerOptions) => {
           start.current = {
             x: e.evt.layerX,
             y: e.evt.layerY,
-            index: index + 1,
             id: String(Date.now())
           };
           updateSelected(undefined)
           updateMode('shape');
-          updateIndex(index + 1);
         }
       }
     }
@@ -76,20 +69,7 @@ export const useMouseShapeHandler = (options: IShapeHandlerOptions) => {
   const onShapeMouseMoveHandler = useMemoizedFn(
     (e: Konva.KonvaEventObject<MouseEvent>) => {
       if (isDrawing.current && start.current && shot) {
-        let { layerX: endX, layerY: endY } = e.evt;
-        const { x, y, width, height } = shot;
-        if (endX <= x) {
-          endX = x;
-        }
-        if (endX >= x + width) {
-          endX = x + width;
-        }
-        if (endY <= y) {
-          endY = y;
-        }
-        if (endY >= y + height) {
-          endY = y + height;
-        }
+        const { layerX: endX, layerY: endY } = e.evt;
         if (
           Math.abs(endX - start.current.x) > SHAPE_MIN_SIZE &&
           Math.abs(endY - start.current.y) > SHAPE_MIN_SIZE &&

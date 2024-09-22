@@ -1,14 +1,21 @@
 import { ScreenShot } from './screenshot';
 import BgImage from './assets/bg.jpg';
+import { useState } from 'react';
 const App = () => {
-    return (
-        <ScreenShot
-            image={BgImage}
-            width={window.innerWidth}
-            height={window.innerHeight}
-            primaryColor='#1677ff'
-        />
-    );
+  const [url, setUrl] = useState('');
+  return (
+    <>
+      <ScreenShot
+        image={BgImage}
+        width={window.innerWidth}
+        height={window.innerHeight}
+        onSuccess={(data) => {
+          setUrl(data);
+        }}
+      />
+      <img src={url} alt='' />
+    </>
+  );
 };
 
 export default App;

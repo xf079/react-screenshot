@@ -1,6 +1,6 @@
 import { FC, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { Image, Layer, Rect, Stage, Transformer } from 'react-konva';
-import { useMemoizedFn } from 'ahooks';
+import { useMemoizedFn, useUpdateEffect } from 'ahooks';
 import Konva from 'konva';
 
 import { useMouseShotHandler } from './hooks/useMouseShotHandler';
@@ -23,10 +23,20 @@ export interface ScreenShotProps {
   image: string;
   width: number;
   height: number;
+  onSuccess?: (image: string) => void;
+  onDownload?: (image: string) => void;
+  onPinned?: (image: string) => void;
+  onClose?: () => void;
 }
 
-const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
+const ScreenShot: FC<ScreenShotProps> = ({
+  image,
+  width,
+  height,
+  onSuccess
+}) => {
   const source = useRef(new window.Image());
+  const stageRef = useRef<Konva.Stage>(null);
   const [ready, setReady] = useState(false);
 
   const [tools, updateTools] = useState<IToolType[]>(ToolList);
@@ -63,11 +73,6 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
    * 当前选中的图形的id
    */
   const [selected, updateSelected] = useState<string>();
-
-  /**
-   * 添加图形的最大索引
-   */
-  const [index, updateIndex] = useState(1);
 
   /**
    * 区域圆角
@@ -117,11 +122,9 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
     isDrawing,
     shot,
     mode,
-    index,
     action,
     shape,
     updateMode,
-    updateIndex,
     updateSelected,
     updateShape,
     updateList
@@ -170,15 +173,56 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
     return { x, y, position };
   }, [height, shot]);
 
-  const shapes = useMemo(() => {
-    return (shape ? [...list, shape] : list).sort((a, b) => a.index - b.index);
-  }, [list, shape]);
+  const shapes = useMemo(
+    () => (shape ? [...list, shape] : list),
+    [list, shape]
+  );
+
+  const onSaveShotImage = useMemoizedFn(() => {
+    if (stageRef.current && shot) {
+      const layers = stageRef.current.getLayers();
+      const imageLayer = layers[0];
+      const imageData = imageLayer
+        .getContext()
+        .getImageData(shot.x, shot.y, shot.width, shot.height);
+      console.log(imageData);
+      const canvas = document.createElement('canvas');
+      canvas.width = imageData.width;
+      canvas.height = imageData.height;
+      const ctx = canvas.getContext('2d');
+      ctx?.putImageData(imageData, 0, 0);
+      return canvas.toDataURL();
+    }
+  });
+
+  const onDownloadHandler = useMemoizedFn(() => {});
+
+  const onCloseHanlder = () => {};
+
+  const onPinnedHandler = useMemoizedFn(() => {});
 
   const onSelectActon = useMemoizedFn((tool: IToolActionType) => {
     if (tool.options) {
       updateAction(tool);
     } else {
       // updateAction(tool);
+      console.log(tool);
+      switch (tool.type) {
+        case 'Success': {
+          const url = onSaveShotImage();
+          if (url) {
+            onSuccess?.(url);
+          }
+          break;
+        }
+        case 'Refresh':
+          break;
+        case 'Close':
+          alert('close');
+          break;
+        case 'Download':
+          break;
+      }
     }
   });
 
@@ -193,7 +237,7 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
     const _idx = list.findIndex((item) => item.id === selected);
     if (_idx !== -1) {
       const _list = list.map((item) => {
-        if (item.id === selected) {
+        if (item.id === selected && item.type === tool.type) {
           return { ...item, options: tool.options };
         }
         return item;
@@ -201,6 +245,23 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
       updateList(_list);
     }
   });
+
+  const onUpdateShapeStateHandler = useMemoizedFn((shape: IShapeType) => {
+    const _list = list.map((item) => (item.id === shape.id ? shape : item));
+    updateList(_list);
+  });
+
+  useUpdateEffect(() => {
+    if (selected) {
+      const _shape = shapes.find((item) => item.id === selected);
+      if (_shape) {
+        updateAction({
+          type: _shape.type,
+          options: _shape.options
+        });
+      }
+    }
+  }, [selected]);
 
   useEffect(() => {
     if (shot && shotRef.current && shotTrRef.current) {
@@ -219,6 +280,7 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
   return (
     <div id='screenshot' style={{ position: 'relative' }}>
       <Stage
+        ref={stageRef}
         width={width}
         height={height}
         onMouseDown={(e) => {
@@ -256,6 +318,17 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
               listening={false}
             />
           )}
+          {shot && (
+            <Shapes
+              list={shapes}
+              shot={shot}
+              mode={mode}
+              selected={selected}
+              updateMode={updateMode}
+              updateSelected={updateSelected}
+              onUpdateShapeState={onUpdateShapeStateHandler}
+            />
+          )}
         </Layer>
         <Layer>
           <Rect
@@ -263,7 +336,7 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
             y={0}
             width={width}
             height={height}
-            listening={false}
+            listening={!shot}
             fill='rgba(0,0,0,0.5)'
           />
           {shot ? (
@@ -274,6 +347,7 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
                 height={shot.height}
                 x={shot.x}
                 y={shot.y}
+                listening={!shot}
                 fill='rgba(0,0,0,0.91)'
                 draggable={!action}
                 cornerRadius={radius}
@@ -320,14 +394,6 @@ const ScreenShot: FC<ScreenShotProps> = ({ image, width, height }) => {
               primaryColor='#1677ff'
             />
           ) : null}
-          {shot && (
-            <Shapes
-              list={shapes}
-              shot={shot}
-              selected={selected}
-              onSelected={updateSelected}
-            />
-          )}
         </Layer>
       </Stage>
       {!isDragMove && shot && (

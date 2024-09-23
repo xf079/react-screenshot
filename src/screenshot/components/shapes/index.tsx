@@ -4,6 +4,7 @@ import { ShapeRect } from './ShapeRect.tsx';
 import { ShapeArrow } from './ShapeArrow.tsx';
 import { ShapeCircle } from './ShapeCircle.tsx';
 import { ShapeLine } from './ShapeLine.tsx';
+import { ShapePencil } from '@/screenshot/components/shapes/ShapePencil.tsx';
 
 export interface ShapesProps extends ShapeBaseProps {
   list: IShapeType[];
@@ -19,6 +20,7 @@ export const Shapes = memo(
     updateMode,
     onUpdateShapeState
   }: ShapesProps) => {
+    console.log(list);
     return (
       <Group>
         {list.map((item, index) => {
@@ -68,6 +70,20 @@ export const Shapes = memo(
           if (item.type === 'Arrow') {
             return (
               <ShapeArrow
+                key={index}
+                shape={item}
+                shot={shot}
+                mode={mode}
+                selected={selected}
+                updateSelected={updateSelected}
+                updateMode={updateMode}
+                onUpdateShapeState={onUpdateShapeState}
+              />
+            );
+          }
+          if (item.type === 'Pencil') {
+            return (
+              <ShapePencil
                 key={index}
                 shape={item}
                 shot={shot}

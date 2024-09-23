@@ -37,6 +37,13 @@ export const arrowDefaultOptions: IShapeOption = {
   color: ToolColorList[0]
 };
 
+export const pencilDefaultOptions: IShapeOption = {
+  size: 40,
+  opacity: 100,
+  color: ToolColorList[0],
+  pencilMode: 'Color'
+};
+
 /**
  * 操作选项工具栏
  */
@@ -74,7 +81,7 @@ export const ToolList: IToolType[] = [
     title: '铅笔',
     width: 16,
     height: 16,
-    options: arrowDefaultOptions
+    options: pencilDefaultOptions
   },
   {
     type: 'Mosaic',

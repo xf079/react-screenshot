@@ -24,6 +24,7 @@ declare global {
     color?: string;
     full?: boolean;
     radius?: boolean;
+    pencilMode?:'Color'|'GaussianBlur'|'Mosaic'
   }
 
   type IOptionActionKey =
@@ -72,6 +73,7 @@ declare global {
     y: number;
     endX: number;
     endY: number;
+    continuous?:number[]
   }
 
   interface IToolActionType {

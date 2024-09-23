@@ -277,6 +277,7 @@ const ScreenShot: FC<ScreenShotProps> = ({
     };
   }, [image]);
 
+
   return (
     <div id='screenshot' style={{ position: 'relative' }}>
       <Stage

@@ -15,8 +15,8 @@ export interface IShapeHandlerOptions {
   mode?: IModeType;
   shape?: IShapeType;
   action?: IToolActionType;
-  updateMode: Dispatch<SetStateAction<IModeType|undefined>>;
-  updateSelected: Dispatch<SetStateAction<string|undefined>>;
+  updateMode: Dispatch<SetStateAction<IModeType | undefined>>;
+  updateSelected: Dispatch<SetStateAction<string | undefined>>;
   updateShape: Dispatch<SetStateAction<IShapeType | undefined>>;
   updateList: Dispatch<SetStateAction<IShapeType[]>>;
 }
@@ -35,6 +35,8 @@ export const useMouseShapeHandler = (options: IShapeHandlerOptions) => {
   } = options;
   // 开始绘制的位置
   const start = useRef<IMouseStartType>();
+
+  const continuousRef = useRef<number[]>([]);
 
   /**
    * 开始绘制自定义图形
@@ -59,7 +61,8 @@ export const useMouseShapeHandler = (options: IShapeHandlerOptions) => {
             y: e.evt.layerY,
             id: String(Date.now())
           };
-          updateSelected(undefined)
+          continuousRef.current = [e.evt.layerX, e.evt.layerY];
+          updateSelected(undefined);
           updateMode('shape');
         }
       }
@@ -75,12 +78,23 @@ export const useMouseShapeHandler = (options: IShapeHandlerOptions) => {
           Math.abs(endY - start.current.y) > SHAPE_MIN_SIZE &&
           action
         ) {
-          updateShape({
-            ...action,
-            ...start.current,
-            endX,
-            endY
-          });
+          if (action.type === 'Pencil') {
+            continuousRef.current.push(endX, endY);
+            updateShape({
+              ...action,
+              ...start.current,
+              continuous: continuousRef.current,
+              endX,
+              endY
+            });
+          } else {
+            updateShape({
+              ...action,
+              ...start.current,
+              endX,
+              endY
+            });
+          }
         }
       }
     }
@@ -90,6 +104,7 @@ export const useMouseShapeHandler = (options: IShapeHandlerOptions) => {
     if (isDrawing.current && start.current && shot) {
       isDrawing.current = false;
       start.current = undefined;
+      continuousRef.current = [];
       updateMode(undefined);
       if (shape) {
         updateList((prevState) => {

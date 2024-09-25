@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { Line, Transformer } from 'react-konva';
-import { FC, Fragment, useEffect, useMemo, useRef } from 'react';
+import { FC, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { useMemoizedFn } from 'ahooks';
 
 export interface IShapePencilProps extends ShapeBaseProps {
@@ -16,6 +16,7 @@ export const ShapePencil: FC<IShapePencilProps> = ({
 }) => {
   const shapeRef = useRef<Konva.Line>(null);
   const shapeTrRef = useRef<Konva.Transformer>(null);
+  const [image,setImage] = useState('')
 
   const rectState = useMemo(() => {
     const minX = Math.min(shape?.x || 0, shape.endX || 0);
@@ -30,6 +31,17 @@ export const ShapePencil: FC<IShapePencilProps> = ({
       height: shape.endY !== undefined ? maxY - minY : 0
     };
   }, [shape]);
+  const filters = useMemo(() => {
+    if (shape.options?.pencilMode === 'Color') {
+      return undefined;
+    }
+    if (shape.options?.pencilMode === 'GaussianBlur') {
+      return [Konva.Filters.Blur];
+    }
+    if (shape.options?.pencilMode === 'Mosaic') {
+      return [Konva.Filters.Pixelate];
+    }
+  }, [shape.options?.pencilMode]);
 
   /**
    * 拖动结束
@@ -60,19 +72,26 @@ export const ShapePencil: FC<IShapePencilProps> = ({
     }
   }, [selected, shape.id]);
 
-  console.log(shape);
+  useEffect(() => {
+    if(shapeRef.current){
+      shapeRef.current?.cache()
+      shapeRef.current?.blurRadius(10)
+      shapeRef.current?.getLayer()?.batchDraw();
+    }
+  }, [shape]);
   return (
     <Fragment>
       <Line
         ref={shapeRef}
-        points={shape.continuous || []}
+        points={shape.continuous}
+        filters={filters}
         bezier={false}
-        stroke={shape.options?.color}
+        stroke={'rgba(0,0,0,0.5)'}
         strokeWidth={shape.options?.size}
-        opacity={(shape.options?.opacity || 0) / 100}
         tension={0}
         lineCap='round'
         lineJoin='round'
+        globalCompositeOperation='color-dodge'
         onMouseDown={(e) => {
           e.cancelBubble = true;
           updateSelected(shape.id);

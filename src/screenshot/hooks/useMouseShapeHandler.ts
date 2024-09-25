@@ -56,11 +56,7 @@ export const useMouseShapeHandler = (options: IShapeHandlerOptions) => {
           action
         ) {
           isDrawing.current = true;
-          start.current = {
-            x: e.evt.layerX,
-            y: e.evt.layerY,
-            id: String(Date.now())
-          };
+          start.current = { x: e.evt.layerX, y: e.evt.layerY, id: String(Date.now()) };
           continuousRef.current = [e.evt.layerX, e.evt.layerY];
           updateSelected(undefined);
           updateMode('shape');

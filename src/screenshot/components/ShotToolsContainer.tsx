@@ -37,7 +37,7 @@ export const ShotToolsContainer: FC<ShotToolsContainerProps> = ({
 
   return (
     <div
-      className='flex flex-row justify-start items-center absolute z-[99] h-10 gap-1 px-2 bg-white bg-opacity-75 backdrop-filter backdrop-blur-md rounded-sm'
+      className='flex flex-row justify-start items-center absolute z-[20] h-10 gap-1 px-2 bg-white bg-opacity-75 backdrop-filter backdrop-blur-md rounded-sm'
       style={{ left: `${rect.x}px`, top: `${rect.y}px` }}
     >
       {tools.map((tool) => {

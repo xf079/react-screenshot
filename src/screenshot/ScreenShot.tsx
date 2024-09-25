@@ -1,7 +1,7 @@
 import { FC, Fragment, useEffect, useMemo, useRef, useState } from 'react';
-import { Image, Layer, Rect, Stage, Transformer } from 'react-konva';
 import { useMemoizedFn, useUpdateEffect } from 'ahooks';
 import Konva from 'konva';
+import { Image, Layer, Rect, Stage, Transformer } from 'react-konva';
 
 import { useMouseShotHandler } from './hooks/useMouseShotHandler';
 import { useMouseShapeHandler } from './hooks/useMouseShapeHandler';
@@ -11,13 +11,13 @@ import { ShotMousePreviewRect } from './components/ShotMousePreviewRect';
 import { ShotSizeContainer } from './components/ShotSizeContainer';
 import { ShotToolsContainer } from './components/ShotToolsContainer';
 import { Shapes } from './components/shapes';
+import { ToolList } from './config';
 import {
   SHOT_TOOLBAR_HEIGHT,
   SHOT_TOOLBAR_MODAL_HEIGHT,
   SHOT_TOOLBAR_SPLIT,
   SHOT_TOOLBAR_WIDTH
 } from './constants';
-import { ToolList } from '@/screenshot/config';
 
 export interface ScreenShotProps {
   image: string;
@@ -195,11 +195,11 @@ const ScreenShot: FC<ScreenShotProps> = ({
     }
   });
 
-  const onDownloadHandler = useMemoizedFn(() => {});
-
-  const onCloseHanlder = () => {};
-
-  const onPinnedHandler = useMemoizedFn(() => {});
+  // const onDownloadHandler = useMemoizedFn(() => {});
+  //
+  // const onCloseHanlder = () => {};
+  //
+  // const onPinnedHandler = useMemoizedFn(() => {});
 
   const onSelectActon = useMemoizedFn((tool: IToolActionType) => {
     if (tool.options) {
@@ -277,7 +277,6 @@ const ScreenShot: FC<ScreenShotProps> = ({
     };
   }, [image]);
 
-
   return (
     <div id='screenshot' style={{ position: 'relative' }}>
       <Stage
@@ -292,12 +291,14 @@ const ScreenShot: FC<ScreenShotProps> = ({
           }
         }}
         onMouseMove={(e) => {
-          if (mode === 'shot') {
-            onShotMouseMoveHandler(e);
-          } else if (mode === 'shape') {
-            onShapeMouseMoveHandler(e);
-          } else {
+          if (!shot) {
             onMouseColorMoveHandler(e);
+          } else {
+            if (mode === 'shot') {
+              onShotMouseMoveHandler(e);
+            } else if (mode === 'shape') {
+              onShapeMouseMoveHandler(e);
+            }
           }
         }}
         onMouseUp={() => {
@@ -324,6 +325,7 @@ const ScreenShot: FC<ScreenShotProps> = ({
               list={shapes}
               shot={shot}
               mode={mode}
+              image={source.current}
               selected={selected}
               updateMode={updateMode}
               updateSelected={updateSelected}

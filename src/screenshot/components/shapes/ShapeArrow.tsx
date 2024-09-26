@@ -90,7 +90,7 @@ export const ShapeArrow: FC<IShapeArrowProps> = ({
             width={8}
             height={8}
             stroke='red'
-            strokeWidth={2}
+            strokeWidth={1}
             radius={5}
             fill='#ffffff'
             draggable
@@ -125,7 +125,7 @@ export const ShapeArrow: FC<IShapeArrowProps> = ({
             width={8}
             height={8}
             stroke='red'
-            strokeWidth={2}
+            strokeWidth={1}
             radius={5}
             fill='#ffffff'
             draggable

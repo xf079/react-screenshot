@@ -2,7 +2,6 @@ import { FC, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { useMemoizedFn, useUpdateEffect } from 'ahooks';
 import Konva from 'konva';
 import { Image, Layer, Rect, Stage, Transformer } from 'react-konva';
-
 import { useMouseShotHandler } from './hooks/useMouseShotHandler';
 import { useMouseShapeHandler } from './hooks/useMouseShapeHandler';
 import { useMousePreviewColor } from './hooks/useMousePreviewColor';
@@ -326,6 +325,8 @@ const ScreenShot: FC<ScreenShotProps> = ({
               shot={shot}
               mode={mode}
               image={source.current}
+              width={width}
+              height={height}
               selected={selected}
               updateMode={updateMode}
               updateSelected={updateSelected}

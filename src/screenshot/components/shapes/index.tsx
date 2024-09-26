@@ -8,6 +8,8 @@ import { ShapePencil } from '@/screenshot/components/shapes/ShapePencil.tsx';
 export interface ShapesProps extends ShapeBaseProps {
   list: IShapeType[];
   image: HTMLImageElement;
+  width:number,
+  height:number
 }
 
 export const Shapes = ({
@@ -16,6 +18,8 @@ export const Shapes = ({
   selected,
   mode,
   image,
+  width,
+  height,
   updateSelected,
   updateMode,
   onUpdateShapeState
@@ -88,6 +92,8 @@ export const Shapes = ({
               shot={shot}
               mode={mode}
               image={image}
+              width={width}
+              height={height}
               selected={selected}
               updateSelected={updateSelected}
               updateMode={updateMode}

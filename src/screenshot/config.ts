@@ -40,8 +40,7 @@ export const arrowDefaultOptions: IShapeOption = {
 export const pencilDefaultOptions: IShapeOption = {
   size: 40,
   opacity: 100,
-  color: ToolColorList[0],
-  pencilMode: 'Color'
+  color: ToolColorList[0]
 };
 
 /**

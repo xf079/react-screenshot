@@ -56,8 +56,16 @@ export const useMouseShapeHandler = (options: IShapeHandlerOptions) => {
           action
         ) {
           isDrawing.current = true;
-          start.current = { x: e.evt.layerX, y: e.evt.layerY, id: String(Date.now()) };
-          continuousRef.current = [e.evt.layerX, e.evt.layerY];
+          if (action.type === 'Pencil') {
+            start.current = { x: 0, y: 0, id: String(Date.now()) };
+            continuousRef.current = [e.evt.layerX, e.evt.layerY];
+          } else {
+            start.current = {
+              x: e.evt.layerX,
+              y: e.evt.layerY,
+              id: String(Date.now())
+            };
+          }
           updateSelected(undefined);
           updateMode('shape');
         }

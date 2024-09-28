@@ -15,6 +15,7 @@ import { OptionArrow, OptionCircle, OptionLine, OptionRect } from './option';
 import { ToolSimpleList } from '../config';
 import { ToolIconList } from '../icon';
 import { OptionPencil } from '@/screenshot/components/option/OptionPencil.tsx';
+import { OptionText } from '@/screenshot/components/option/OptionText.tsx';
 
 export interface ShotToolsContainerProps {
   rect: IToolRectType;
@@ -117,6 +118,14 @@ export const ShotToolsContainer: FC<ShotToolsContainerProps> = ({
               )}
               {tool.type === 'Pencil' && (
                 <OptionPencil
+                  options={tool.options}
+                  onUpdateOptions={(_options) =>
+                    onOptionsUpdate(tool, _options)
+                  }
+                />
+              )}
+              {tool.type === 'Text' && (
+                <OptionText
                   options={tool.options}
                   onUpdateOptions={(_options) =>
                     onOptionsUpdate(tool, _options)

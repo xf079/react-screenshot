@@ -1,8 +1,7 @@
 import { FC, memo } from 'react';
 import { useControllableValue } from 'ahooks';
 import { Check } from 'lucide-react';
-import { Slider } from '@/components/ui/slider';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Slider, Checkbox } from 'antd';
 import { circleDefaultOptions, ToolColorList } from '../../config';
 
 export interface ICircleOption {
@@ -22,34 +21,36 @@ export const OptionCircle: FC<ICircleOption> = memo((props) => {
   return (
     <div className='w-[315px] flex flex-row items-center gap-3'>
       <div className='flex flex-col gap-2'>
-        <div className='flex flex-row justify-end items-center gap-2'>
-          <span className='w-9 text-right text-xs text-stone-900 text-opacity-90'>大小</span>
+        <div className='flex flex-row justify-end items-center gap-3'>
+          <span className='w-9 text-right text-xs text-stone-900 text-opacity-90'>
+            大小
+          </span>
           <Slider
-            defaultValue={[state.size || 0]}
             min={5}
             max={15}
             step={5}
-            value={[state.size || 0]}
-            className='w-[60px]'
-            onValueChange={(values) => {
-              updateState({ ...state, size: values[0] });
+            value={state.size}
+            className='w-[60px] m-0'
+            onChange={(val) => {
+              updateState({ ...state, size: val });
             }}
           />
           <span className='w-6  text-xs text-stone-900 text-opacity-90'>
             {state.size || 0}
           </span>
         </div>
-        <div className='flex flex-row flex-shrink-0  justify-end items-center gap-2'>
-          <span className='w-9 text-right text-xs text-stone-900 text-opacity-90'>透明度</span>
+        <div className='flex flex-row flex-shrink-0 justify-end items-center gap-3'>
+          <span className='w-9 text-right text-xs text-stone-900 text-opacity-90'>
+            透明度
+          </span>
           <Slider
-            defaultValue={[state.opacity || 0]}
             min={0}
             max={100}
             step={1}
-            value={[state.opacity || 0]}
-            className='w-[60px]'
-            onValueChange={(values) => {
-              updateState({ ...state, opacity: values[0] });
+            value={state.opacity}
+            className='w-[60px] m-0'
+            onChange={(val) => {
+              updateState({ ...state, opacity: val });
             }}
           />
           <span className='w-6 text-xs text-stone-900 text-opacity-90'>
@@ -79,7 +80,9 @@ export const OptionCircle: FC<ICircleOption> = memo((props) => {
           }}
         >
           <Checkbox checked={state.full} />
-          <span className='flex-shrink-0 text-xs text-stone-900 text-opacity-90'>空心</span>
+          <span className='flex-shrink-0 text-xs text-stone-900 text-opacity-90'>
+            空心
+          </span>
         </div>
       </div>
     </div>

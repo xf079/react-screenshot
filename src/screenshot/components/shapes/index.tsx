@@ -1,15 +1,16 @@
 import { Group } from 'react-konva';
-import { ShapeRect } from './ShapeRect.tsx';
-import { ShapeArrow } from './ShapeArrow.tsx';
-import { ShapeCircle } from './ShapeCircle.tsx';
-import { ShapeLine } from './ShapeLine.tsx';
-import { ShapePencil } from '@/screenshot/components/shapes/ShapePencil.tsx';
+import { ShapeRect } from './ShapeRect';
+import { ShapeArrow } from './ShapeArrow';
+import { ShapeCircle } from './ShapeCircle';
+import { ShapeLine } from './ShapeLine';
+import { ShapePencil } from './ShapePencil';
+import { ShapeMosaic } from './ShapeMosaic';
 
 export interface ShapesProps extends ShapeBaseProps {
   list: IShapeType[];
   image: HTMLImageElement;
-  width:number,
-  height:number
+  width: number;
+  height: number;
 }
 
 export const Shapes = ({
@@ -18,8 +19,6 @@ export const Shapes = ({
   selected,
   mode,
   image,
-  width,
-  height,
   updateSelected,
   updateMode,
   onUpdateShapeState
@@ -91,9 +90,21 @@ export const Shapes = ({
               shape={item}
               shot={shot}
               mode={mode}
+              selected={selected}
+              updateSelected={updateSelected}
+              updateMode={updateMode}
+              onUpdateShapeState={onUpdateShapeState}
+            />
+          );
+        }
+        if (item.type === 'Mosaic') {
+          return (
+            <ShapeMosaic
+              key={index}
+              shape={item}
+              shot={shot}
+              mode={mode}
               image={image}
-              width={width}
-              height={height}
               selected={selected}
               updateSelected={updateSelected}
               updateMode={updateMode}

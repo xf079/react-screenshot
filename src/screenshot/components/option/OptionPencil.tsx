@@ -1,66 +1,56 @@
 import { FC, memo } from 'react';
 import { useControllableValue } from 'ahooks';
-import { Slider } from '@/components/ui/slider';
-import { pencilDefaultOptions, ToolColorList } from '../../config';
+import { Divider, Slider } from 'antd';
 import { Check } from 'lucide-react';
+import { circleDefaultOptions, ToolColorList } from '../../config';
 
-export interface IPencilOption {
-  options?: IShapeOption;
-  defaultOptions?: IShapeOption;
-  onUpdateOptions: (options: IShapeOption) => void;
-}
-
-export const OptionPencil: FC<IPencilOption> = memo((props) => {
+export const OptionPencil: FC<IOptionCommonProps> = memo((props) => {
   const [state, updateState] = useControllableValue(props, {
-    defaultValue: pencilDefaultOptions,
+    defaultValue: circleDefaultOptions,
     defaultValuePropName: 'defaultOptions',
     valuePropName: 'options',
     trigger: 'onUpdateOptions'
   });
 
-  // @ts-ignore
   return (
-    <div className='w-[235px] flex flex-row items-center gap-3'>
-      <div className='flex flex-col gap-2'>
-        <div className='flex flex-row justify-end items-center gap-2'>
-          <span className='w-9 text-right text-xs text-stone-900 text-opacity-90'>
+    <div className='w-[248px] flex flex-row items-center gap-1'>
+      <div className='flex flex-col gap-1.5'>
+        <div className='flex flex-row justify-end items-center gap-3'>
+          <span className='w-12 text-right text-xs font-medium text-stone-900 text-opacity-90'>
             大小
           </span>
           <Slider
-            defaultValue={[state.size || 0]}
-            min={10}
-            max={60}
-            step={5}
-            value={[state.size || 0]}
-            className='w-[60px]'
-            onValueChange={(values) => {
-              updateState({ ...state, size: values[0] });
+            min={5}
+            max={25}
+            value={state.size}
+            className='w-[44px] m-0'
+            onChange={(value) => {
+              updateState({ ...state, size: value });
             }}
           />
-          <span className='w-6  text-xs text-stone-900 text-opacity-90'>
+          <span className='w-6  text-xs font-medium text-stone-900 text-opacity-90'>
             {state.size || 0}
           </span>
         </div>
-        <div className='flex flex-row flex-shrink-0  justify-end items-center gap-2'>
-          <span className='w-9 text-right text-xs text-stone-900 text-opacity-90'>
-            透明度
+        <div className='flex flex-row flex-shrink-0  justify-end items-center gap-3'>
+          <span className='w-12 text-right text-xs font-medium text-stone-900 text-opacity-90'>
+            不透明度
           </span>
           <Slider
-            defaultValue={[state.opacity || 0]}
             min={0}
             max={100}
-            step={1}
-            value={[state.opacity || 0]}
-            className='w-[60px]'
-            onValueChange={(values) => {
-              updateState({ ...state, opacity: values[0] });
+            value={state.opacity}
+            className='w-[44px] m-0'
+            onChange={(value) => {
+              updateState({ ...state, opacity: value });
             }}
           />
-          <span className='w-6 text-xs text-stone-900 text-opacity-90'>
+          <span className='w-6 text-xs font-medium text-stone-900 text-opacity-90'>
             {state.opacity || 0}
           </span>
         </div>
       </div>
+      <Divider type="vertical" dashed className='h-8'/>
       <div className='flex flex-row flex-shrink-0 justify-center items-center flex-wrap gap-2 w-[80px] pt-0.5'>
         {ToolColorList.map((val) => (
           <a

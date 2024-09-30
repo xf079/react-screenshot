@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { Line } from 'react-konva';
+import { Line, Transformer } from 'react-konva';
 import { FC, Fragment, useEffect, useRef } from 'react';
 import { useMemoizedFn } from 'ahooks';
 
@@ -15,6 +15,7 @@ export const ShapePencil: FC<IShapePencilProps> = ({
   onUpdateShapeState
 }) => {
   const shapeRef = useRef<Konva.Line>(null);
+  const shapeTrRef = useRef<Konva.Transformer>(null);
 
   /**
    * 拖动结束
@@ -35,10 +36,11 @@ export const ShapePencil: FC<IShapePencilProps> = ({
   );
 
   useEffect(() => {
-    if (selected === shape.id) {
-      if (shapeRef.current) {
-        shapeRef.current?.moveToTop();
-      }
+    if (selected === shape.id && shapeRef.current && shapeTrRef.current) {
+      shapeTrRef.current?.nodes([shapeRef.current]);
+      shapeTrRef.current?.getLayer()?.batchDraw();
+      shapeRef.current?.moveToTop();
+      shapeTrRef.current?.moveToTop();
     }
   }, [selected, shape.id]);
 
@@ -87,6 +89,21 @@ export const ShapePencil: FC<IShapePencilProps> = ({
         draggable
         onDragEnd={onShapeDragEndFunc}
       />
+
+      {selected === shape.id && (
+        <Transformer
+          ref={shapeTrRef}
+          resizeEnabled={false}
+          rotateEnabled={false}
+          borderStroke='#ddd'
+          borderDash={[3,3]}
+          centeredScaling={false}
+          keepRatio={false}
+          onMouseDown={(e) => {
+            e.cancelBubble = true;
+          }}
+        />
+      )}
     </Fragment>
   );
 };

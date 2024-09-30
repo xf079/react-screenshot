@@ -1,95 +1,98 @@
-import { FC } from 'react';
-import { Input } from '@/components/ui/input';
-import { Slider } from '@/components/ui/slider';
-import { Checkbox } from '@/components/ui/checkbox';
+import { memo } from 'react';
+import { Input, Slider, Checkbox } from 'antd';
+import { useShallow } from 'zustand/react/shallow';
+import { useStore } from '../store';
 
-export interface ShotSizeContainerProps {
-  windowWidth: number;
-  windowHeight: number;
-  width: number;
-  height: number;
-  x: number;
-  y: number;
-  radius: number;
-  shadow: boolean;
-  onRectChange: (width: number, height: number) => void;
-  onRadiusChange: (radius: number) => void;
-  onShadowChange: (shadowEnabled: boolean) => void;
-}
-
-export const ShotSizeContainer: FC<ShotSizeContainerProps> = ({
-  windowWidth,
-  windowHeight,
-  width,
-  height,
-  x,
-  y,
-  radius,
-  shadow,
-  onRectChange,
-  onRadiusChange,
-  onShadowChange
-}) => {
+export const ShotSizeContainer = memo(() => {
+  const {
+    shot,
+    windowWidth,
+    windowHeight,
+    width,
+    height,
+    sizedRect,
+    shadow,
+    radius,
+    updateShot,
+    updateRadius,
+    updateShadow
+  } = useStore(
+    useShallow((state) => ({
+      shot: state.shot,
+      windowWidth: state.width,
+      windowHeight: state.height,
+      width: (state.shot?.width || 0).toFixed(0),
+      height: (state.shot?.height || 0).toFixed(0),
+      sizedRect: state.sizedRect,
+      shadow: state.shadow,
+      radius: state.radius,
+      updateShot: state.updateShot,
+      updateShadow: state.updateShadow,
+      updateRadius: state.updateRadius
+    }))
+  );
   return (
     <div
-      className='flex flex-row justify-start items-center absolute z-[9999] h-7 gap-3 px-3 bg-white bg-opacity-75 backdrop-filter backdrop-blur-md rounded-sm'
-      style={{ top: y, left: x }}
+      className='flex flex-row justify-start items-center absolute z-[100] h-8 gap-2 px-2 bg-white rounded-sm'
+      style={{ top: sizedRect.y, left: sizedRect.x }}
     >
       <div className='flex flex-row justify-start gap-2 text-black font-light text-sm'>
         <Input
-          placeholder='Filled'
-          className='w-14 h-5 text-xs text-center'
+          className='w-14 h-5 text-xs text-center font-medium'
           value={width}
           onChange={(e) => {
+            if (!shot) return;
             const value = Number(e.target.value);
             if (/^\d+$/.test(e.target.value)) {
               const newWidth =
-                x + value < windowWidth ? value : windowWidth - x;
-              onRectChange(newWidth, height);
+                sizedRect.x + value < windowWidth
+                  ? value
+                  : windowWidth - sizedRect.x;
+              updateShot({ ...shot, width: newWidth });
             } else {
-              onRectChange(width, height);
+              updateShot(shot);
             }
           }}
         />
-        <span>x</span>
+        <span className='font-medium'>x</span>
         <Input
-          placeholder='Filled'
-          className='w-14 h-5 text-xs text-center'
+          className='w-14 h-5 text-xs text-center font-medium'
           value={height}
           onChange={(e) => {
+            if (!shot) return;
             const value = Number(e.target.value);
             if (/^\d+$/.test(e.target.value)) {
               const newHeight =
-                y + value < windowHeight ? value : windowHeight - y;
-              onRectChange(width, newHeight);
+                sizedRect.y + value < windowHeight
+                  ? value
+                  : windowHeight - sizedRect.y;
+              updateShot({ ...shot, height: newHeight });
             } else {
-              onRectChange(width, height);
+              updateShot(shot);
             }
           }}
         />
       </div>
       <Slider
-        defaultValue={[radius]}
         min={0}
         max={100}
         step={1}
-        value={[radius]}
+        value={radius}
         className='w-[60px]'
-        onValueChange={(values) => {
-          onRadiusChange(values[0]);
+        onChange={(value) => {
+          updateRadius(value);
         }}
       />
-      <div
-        className='flex items-center space-x-2 cursor-pointer'
-        onClick={() => {
-          onShadowChange(!shadow);
-        }}
-      >
-        <Checkbox checked={shadow} />
-        <span className='text-xs font-medium select-none leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'>
-          阴影
-        </span>
+      <div className='flex items-center space-x-2 cursor-pointer'>
+        <Checkbox
+          checked={shadow}
+          onChange={(e) => {
+            updateShadow(e.target.checked);
+          }}
+        >
+          <span className='text-xs font-medium'>阴影</span>
+        </Checkbox>
       </div>
     </div>
   );
-};
+});

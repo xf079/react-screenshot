@@ -1,4 +1,3 @@
-
 export const ToolColorList = [
   '#f5222d',
   '#fa541c',
@@ -41,6 +40,12 @@ export const pencilDefaultOptions: IShapeOption = {
   size: 40,
   opacity: 100,
   color: ToolColorList[0]
+};
+
+export const mosaicDefaultOptions: IShapeOption = {
+  size: 10,
+  opacity: 100,
+  pencilMode: 'GaussianBlur'
 };
 
 /**
@@ -87,7 +92,7 @@ export const ToolList: IToolType[] = [
     title: '马赛克',
     width: 16,
     height: 16,
-    options: arrowDefaultOptions
+    options: mosaicDefaultOptions
   },
   {
     type: 'Text',

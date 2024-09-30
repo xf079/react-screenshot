@@ -1,37 +1,56 @@
 import { FC, memo } from 'react';
 import { useControllableValue } from 'ahooks';
-import { pencilDefaultOptions, ToolColorList } from '../../config';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select.tsx';
+import { Slider, Divider } from 'antd';
 import { Check } from 'lucide-react';
+import { circleDefaultOptions, ToolColorList } from '../../config';
 
-export interface IOptionText {
-  options?: IShapeOption;
-  defaultOptions?: IShapeOption;
-  onUpdateOptions: (options: IShapeOption) => void;
-}
-
-export const OptionText: FC<IOptionText> = memo((props) => {
+export const OptionText: FC<IOptionCommonProps> = memo((props) => {
   const [state, updateState] = useControllableValue(props, {
-    defaultValue: pencilDefaultOptions,
+    defaultValue: circleDefaultOptions,
     defaultValuePropName: 'defaultOptions',
     valuePropName: 'options',
     trigger: 'onUpdateOptions'
   });
 
-  const fontSize = Array(8)
-    .fill(0)
-    .map((_, i) => String(i + 10));
-  console.log(fontSize);
-
   return (
-    <div className='w-[375px] flex flex-row items-center gap-3'>
+    <div className='w-[254px] flex flex-row items-center gap-1'>
+      <div className='flex flex-col gap-1.5'>
+        <div className='flex flex-row justify-end items-center gap-3'>
+          <span className='w-12 text-right text-xs font-medium text-stone-900 text-opacity-90'>
+            大小
+          </span>
+          <Slider
+            min={5}
+            max={25}
+            value={state.size}
+            className='w-[44px] m-0'
+            onChange={(value) => {
+              updateState({ ...state, size: value });
+            }}
+          />
+          <span className='w-6  text-xs font-medium text-stone-900 text-opacity-90'>
+            {state.size || 0}
+          </span>
+        </div>
+        <div className='flex flex-row flex-shrink-0  justify-end items-center gap-3'>
+          <span className='w-12 text-right text-xs font-medium text-stone-900 text-opacity-90'>
+            不透明度
+          </span>
+          <Slider
+            min={0}
+            max={100}
+            value={state.opacity}
+            className='w-[44px] m-0'
+            onChange={(value) => {
+              updateState({ ...state, opacity: value });
+            }}
+          />
+          <span className='w-6 text-xs font-medium text-stone-900 text-opacity-90'>
+            {state.opacity || 0}
+          </span>
+        </div>
+      </div>
+      <Divider type='vertical' dashed className='h-8' />
       <div className='flex flex-row flex-shrink-0 justify-center items-center flex-wrap gap-2 w-[80px] pt-0.5'>
         {ToolColorList.map((val) => (
           <a
@@ -45,48 +64,6 @@ export const OptionText: FC<IOptionText> = memo((props) => {
             {state.color === val && <Check className='w-3 h-3 text-white' />}
           </a>
         ))}
-      </div>
-      <div className='h-full flex flex-col justify-center self-start items-start gap-2 pt-0.5 ml-2'>
-        <Select
-          defaultValue={state.pencilMode}
-          onValueChange={(val) => {
-            updateState({
-              ...state,
-              pencilMode: val as unknown as IShapeOption['pencilMode']
-            });
-          }}
-        >
-          <SelectTrigger className='w-[100px]'>
-            <SelectValue placeholder='请选择操作类型' />
-          </SelectTrigger>
-          <SelectContent className='w-[100px]'>
-            <SelectGroup>
-              {fontSize.map((val) => (
-                <SelectItem value={val}>{val}</SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-        <Select
-          defaultValue={state.pencilMode}
-          onValueChange={(val) => {
-            updateState({
-              ...state,
-              pencilMode: val as unknown as IShapeOption['pencilMode']
-            });
-          }}
-        >
-          <SelectTrigger className='w-[100px]'>
-            <SelectValue placeholder='请选择操作类型' />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectItem value='Color'>单一颜色</SelectItem>
-              <SelectItem value='GaussianBlur'>高斯模糊</SelectItem>
-              <SelectItem value='Mosaic'>马赛克</SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
       </div>
     </div>
   );

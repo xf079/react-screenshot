@@ -2,19 +2,26 @@ import { useMemoizedFn } from 'ahooks';
 import { MutableRefObject, useRef } from 'react';
 import Konva from 'konva';
 import { SHOT_MIN_SIZE } from '../constants';
+import { useStore } from '../store';
+import { useShallow } from 'zustand/react/shallow';
 
 export interface IShotHandlerOptions {
   isDrawing: MutableRefObject<boolean>;
-  shot?: IShotRect;
-  mode?: IModeType;
-  updateShot: (shot?: IShotRect) => void;
-  updateMode: (mode?: IModeType) => void;
 }
 
 export const useMouseShotHandler = (options: IShotHandlerOptions) => {
-  const { isDrawing, mode, shot, updateShot, updateMode } = options;
+  const { isDrawing } = options;
   // 开始绘制的位置
   const start = useRef({ x: 0, y: 0 });
+
+  const { shot, mode, updateMode, updateShot } = useStore(
+    useShallow((state) => ({
+      shot: state.shot,
+      mode: state.mode,
+      updateShot: state.updateShot,
+      updateMode: state.updateMode
+    }))
+  );
 
   const onShotMouseDownHandler = useMemoizedFn(
     (e: Konva.KonvaEventObject<MouseEvent>) => {

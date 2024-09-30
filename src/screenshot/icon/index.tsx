@@ -3,30 +3,23 @@ import {
   Circle,
   Slash,
   MoveUpRight,
-  Pencil,
-  Blend,
   Type,
   Pin,
   CornerDownLeft,
   X,
   ArrowDownToLine,
   Check,
-  LucideProps
 } from 'lucide-react';
-import React from 'react';
+import MosaicIcon from './icon-mosaic.svg?react';
+import PencilIcon from './icon-pencil.svg?react'
 
-export const ToolIconList: Record<
-  IOptionsKeyType,
-  React.ForwardRefExoticComponent<
-    Omit<LucideProps, 'ref'> & React.RefAttributes<SVGSVGElement>
-  >
-> = {
+export const ToolIconList: Record<IOptionsKeyType, any> = {
   Rect: Square,
   Circle: Circle,
   Line: Slash,
   Arrow: MoveUpRight,
-  Pencil: Pencil,
-  Mosaic: Blend,
+  Pencil: PencilIcon,
+  Mosaic: MosaicIcon,
   Text: Type,
   Pinned: Pin,
   Refresh: CornerDownLeft,

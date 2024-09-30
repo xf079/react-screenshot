@@ -3,6 +3,15 @@ import { Dispatch, SetStateAction } from 'react';
 export {};
 
 declare global {
+  interface IPosition {
+    x: number;
+    y: number;
+  }
+
+  interface IToolPosition extends IPosition{
+    position: 'top' | 'bottom';
+  }
+
   interface IShotRect {
     x: number;
     y: number;
@@ -12,11 +21,6 @@ declare global {
 
   type IModeType = 'shot' | 'shape' | 'drag';
 
-  interface IToolRectType {
-    x: number;
-    y: number;
-    position: 'top' | 'bottom';
-  }
 
   interface IShapeOption {
     size?: number;
@@ -24,7 +28,7 @@ declare global {
     color?: string;
     full?: boolean;
     radius?: boolean;
-    pencilMode?:'Color'|'GaussianBlur'|'Mosaic'
+    pencilMode?: 'GaussianBlur' | 'Mosaic';
   }
 
   type IOptionActionKey =
@@ -73,7 +77,7 @@ declare global {
     y: number;
     endX: number;
     endY: number;
-    continuous?:number[]
+    continuous?: number[];
   }
 
   interface IToolActionType {
@@ -88,5 +92,11 @@ declare global {
     updateSelected: Dispatch<SetStateAction<string | undefined>>;
     updateMode: Dispatch<SetStateAction<IModeType | undefined>>;
     onUpdateShapeState: (shape: IShapeType) => void;
+  }
+
+  interface IOptionCommonProps{
+    options?: IShapeOption;
+    defaultOptions?: IShapeOption;
+    onUpdateOptions: (options: IShapeOption) => void;
   }
 }

@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { Input, Slider, Checkbox } from 'antd';
 import { useShallow } from 'zustand/react/shallow';
 import { useStore } from '../store';
@@ -8,9 +8,6 @@ export const ShotSizeContainer = memo(() => {
     shot,
     windowWidth,
     windowHeight,
-    width,
-    height,
-    sizedRect,
     shadow,
     radius,
     updateShot,
@@ -21,9 +18,6 @@ export const ShotSizeContainer = memo(() => {
       shot: state.shot,
       windowWidth: state.width,
       windowHeight: state.height,
-      width: (state.shot?.width || 0).toFixed(0),
-      height: (state.shot?.height || 0).toFixed(0),
-      sizedRect: state.sizedRect,
       shadow: state.shadow,
       radius: state.radius,
       updateShot: state.updateShot,
@@ -31,23 +25,37 @@ export const ShotSizeContainer = memo(() => {
       updateRadius: state.updateRadius
     }))
   );
+
+  const position = useMemo(() => {
+    if (!shot) return { x: 0, y: 0 };
+    const { x: shotX = 0, y: shotY = 0, width: shotW = 0 } = shot;
+    const y = shotY > 38 ? shotY - 38 : shotY + 10;
+    const x =
+      shotW > 444
+        ? shotX + 6
+        : windowWidth - shotX > 444
+          ? shotX + 6
+          : windowWidth - 444;
+    return { x, y };
+  }, [shot, windowWidth]);
+
   return (
     <div
       className='flex flex-row justify-start items-center absolute z-[100] h-8 gap-2 px-2 bg-white rounded-sm'
-      style={{ top: sizedRect.y, left: sizedRect.x }}
+      style={{ top: position.y, left: position.x }}
     >
       <div className='flex flex-row justify-start gap-2 text-black font-light text-sm'>
         <Input
           className='w-14 h-5 text-xs text-center font-medium'
-          value={width}
+          value={(shot?.width || 0).toFixed(0)}
           onChange={(e) => {
             if (!shot) return;
             const value = Number(e.target.value);
             if (/^\d+$/.test(e.target.value)) {
               const newWidth =
-                sizedRect.x + value < windowWidth
+                position.x + value < windowWidth
                   ? value
-                  : windowWidth - sizedRect.x;
+                  : windowWidth - position.x;
               updateShot({ ...shot, width: newWidth });
             } else {
               updateShot(shot);
@@ -57,15 +65,15 @@ export const ShotSizeContainer = memo(() => {
         <span className='font-medium'>x</span>
         <Input
           className='w-14 h-5 text-xs text-center font-medium'
-          value={height}
+          value={(shot?.height || 0).toFixed(0)}
           onChange={(e) => {
             if (!shot) return;
             const value = Number(e.target.value);
             if (/^\d+$/.test(e.target.value)) {
               const newHeight =
-                sizedRect.y + value < windowHeight
+                position.y + value < windowHeight
                   ? value
-                  : windowHeight - sizedRect.y;
+                  : windowHeight - position.y;
               updateShot({ ...shot, height: newHeight });
             } else {
               updateShot(shot);

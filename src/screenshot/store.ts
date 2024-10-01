@@ -1,10 +1,10 @@
 import { create } from 'zustand';
 import {
-  SHOT_TOOLBAR_HEIGHT,
-  SHOT_TOOLBAR_MODAL_HEIGHT,
-  SHOT_TOOLBAR_SPLIT,
-  SHOT_TOOLBAR_WIDTH
-} from '@/screenshot/constants.ts';
+  TOOLBAR_HEIGHT,
+  TOOLBAR_MODAL_HEIGHT,
+  TOOLBAR_SPLIT,
+  TOOLBAR_WIDTH
+} from './constants';
 
 export interface IStore {
   width: number;
@@ -49,7 +49,8 @@ export const useStore = create<IStore>((set, get) => ({
   },
 
   get sizedRect() {
-    const { width, shot } = get();
+    const shot = get().shot;
+    const width = get().width;
     if (!shot) return { x: 0, y: 0 };
     const { x: shotX = 0, y: shotY = 0, width: shotW = 0 } = shot;
     const y = shotY > 38 ? shotY - 38 : shotY + 10;
@@ -59,7 +60,8 @@ export const useStore = create<IStore>((set, get) => ({
   },
 
   get toolRect() {
-    const { shot, height } = get();
+    const shot = get().shot;
+    const height = get().height;
     if (!shot) return { x: 0, y: 0, position: 'top' };
     const {
       x: shotX = 0,
@@ -72,21 +74,17 @@ export const useStore = create<IStore>((set, get) => ({
     const pendX = shotX + shotW;
 
     const y =
-      pendY + SHOT_TOOLBAR_HEIGHT + SHOT_TOOLBAR_SPLIT < height
-        ? pendY + SHOT_TOOLBAR_SPLIT
-        : pendY - (SHOT_TOOLBAR_HEIGHT + SHOT_TOOLBAR_SPLIT);
+      pendY + TOOLBAR_HEIGHT + TOOLBAR_SPLIT < height
+        ? pendY + TOOLBAR_SPLIT
+        : pendY - (TOOLBAR_HEIGHT + TOOLBAR_SPLIT);
 
     const x =
-      pendX > SHOT_TOOLBAR_WIDTH + SHOT_TOOLBAR_SPLIT
-        ? pendX - (SHOT_TOOLBAR_WIDTH + SHOT_TOOLBAR_SPLIT / 2)
-        : shotX + SHOT_TOOLBAR_SPLIT / 2;
+      pendX > TOOLBAR_WIDTH + TOOLBAR_SPLIT
+        ? pendX - (TOOLBAR_WIDTH + TOOLBAR_SPLIT / 2)
+        : shotX + TOOLBAR_SPLIT / 2;
 
     const position =
-      pendY +
-        SHOT_TOOLBAR_HEIGHT +
-        SHOT_TOOLBAR_SPLIT +
-        SHOT_TOOLBAR_MODAL_HEIGHT <
-      height
+      pendY + TOOLBAR_HEIGHT + TOOLBAR_SPLIT + TOOLBAR_MODAL_HEIGHT < height
         ? 'bottom'
         : 'top';
 
